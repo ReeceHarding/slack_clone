@@ -1,7 +1,7 @@
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useForm } from "react-hook-form";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { useForm } from "react-hook-form";
-import { useAuthActions } from "@convex-dev/auth/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { SignInFlow } from "../types";
+import { TriangleAlert } from "lucide-react";
 import { useState } from "react";
+import { SignInFlow } from "../types";
 
 interface SignInCardProps {
   setState: (state: SignInFlow) => void;
@@ -22,6 +23,8 @@ interface SignInCardProps {
 
 export const SignInCard = ({ setState }: SignInCardProps) => {
   const [signingIn, setSigningIn] = useState(false);
+  const [error, setError] = useState("");
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -30,6 +33,17 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
   });
 
   const { signIn } = useAuthActions();
+
+  const handlePasswordSignIn = form.handleSubmit(({ email, password }) => {
+    setSigningIn(true);
+    signIn("password", { email, password, flow: "signIn" })
+      .catch(() => {
+        setError("Invalid email or password");
+      })
+      .finally(() => {
+        setSigningIn(false);
+      });
+  });
 
   const handleProviderSignIn = (value: "github" | "google") => () => {
     setSigningIn(true);
@@ -46,8 +60,14 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
           Use your email or another service to continue
         </CardDescription>
       </CardHeader>
+      {error && (
+        <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
+          <TriangleAlert className="size-4" />
+          <p>{error}</p>
+        </div>
+      )}
       <CardContent className="space-y-5 px-0 pb-0">
-        <form className="space-y-2.5">
+        <form className="space-y-2.5" onSubmit={handlePasswordSignIn}>
           <Input
             {...form.register("email", {
               required: true,

@@ -1,3 +1,7 @@
+import { useAuthActions } from "@convex-dev/auth/react";
+import { TriangleAlert } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
@@ -12,13 +16,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SignInFlow } from "../types";
-import { useForm } from "react-hook-form";
 
 interface SignUpCardProps {
   setState: (state: SignInFlow) => void;
 }
 
 export const SignUpCard = ({ setState }: SignUpCardProps) => {
+  const [signingUp, setSigningUp] = useState(false);
+  const [error, setError] = useState("");
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -26,6 +32,32 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
       confirmPassword: "",
     },
   });
+
+  const { signIn } = useAuthActions();
+
+  const handlePasswordSignUp = form.handleSubmit(
+    ({ email, password, confirmPassword }) => {
+      if (password !== confirmPassword) {
+        setError("Passwords do not match");
+        return;
+      }
+      setSigningUp(true);
+      signIn("password", { email, password, flow: "signUp" })
+        .catch(() => {
+          setError("Something went wrong!");
+        })
+        .finally(() => {
+          setSigningUp(false);
+        });
+    }
+  );
+
+  const handleProviderSignUp = (value: "github" | "google") => () => {
+    setSigningUp(true);
+    signIn(value).finally(() => {
+      setSigningUp(false);
+    });
+  };
 
   return (
     <Card className="w-full h-full p-8">
@@ -35,13 +67,19 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
           Use your email or another service to continue
         </CardDescription>
       </CardHeader>
+      {error && (
+        <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
+          <TriangleAlert className="size-4" />
+          <p>{error}</p>
+        </div>
+      )}
       <CardContent className="space-y-5 px-0 pb-0">
-        <form className="space-y-2.5">
+        <form className="space-y-2.5" onSubmit={handlePasswordSignUp}>
           <Input
             {...form.register("email", {
               required: true,
             })}
-            disabled={false}
+            disabled={signingUp}
             placeholder="Email"
             type="email"
           />
@@ -49,7 +87,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
             {...form.register("password", {
               required: true,
             })}
-            disabled={false}
+            disabled={signingUp}
             placeholder="Password"
             type="password"
           />
@@ -57,19 +95,24 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
             {...form.register("confirmPassword", {
               required: true,
             })}
-            disabled={false}
+            disabled={signingUp}
             placeholder="Confirm password"
             type="password"
           />
-          <Button type="submit" className="w-full" size="lg" disabled={false}>
+          <Button
+            type="submit"
+            className="w-full"
+            size="lg"
+            disabled={signingUp}
+          >
             Continue
           </Button>
         </form>
         <Separator />
         <div className="flex flex-col gap-y-2.5">
           <Button
-            disabled={false}
-            onClick={() => null}
+            disabled={signingUp}
+            onClick={handleProviderSignUp("google")}
             variant="outline"
             size="lg"
             className="w-full relative"
@@ -78,8 +121,8 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
             Continue with Google
           </Button>
           <Button
-            disabled={false}
-            onClick={() => null}
+            disabled={signingUp}
+            onClick={handleProviderSignUp("github")}
             variant="outline"
             size="lg"
             className="w-full relative"
