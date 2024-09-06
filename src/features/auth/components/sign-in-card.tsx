@@ -14,12 +14,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SignInFlow } from "../types";
+import { useState } from "react";
 
 interface SignInCardProps {
   setState: (state: SignInFlow) => void;
 }
 
 export const SignInCard = ({ setState }: SignInCardProps) => {
+  const [signingIn, setSigningIn] = useState(false);
   const form = useForm({
     defaultValues: {
       email: "",
@@ -30,7 +32,10 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
   const { signIn } = useAuthActions();
 
   const handleProviderSignIn = (value: "github" | "google") => () => {
-    signIn(value);
+    setSigningIn(true);
+    signIn(value).finally(() => {
+      setSigningIn(false);
+    });
   };
 
   return (
@@ -47,7 +52,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             {...form.register("email", {
               required: true,
             })}
-            disabled={false}
+            disabled={signingIn}
             placeholder="Email"
             type="email"
           />
@@ -55,19 +60,24 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             {...form.register("password", {
               required: true,
             })}
-            disabled={false}
+            disabled={signingIn}
             placeholder="Password"
             type="password"
           />
-          <Button type="submit" className="w-full" size="lg" disabled={false}>
+          <Button
+            type="submit"
+            className="w-full"
+            size="lg"
+            disabled={signingIn}
+          >
             Continue
           </Button>
         </form>
         <Separator />
         <div className="flex flex-col gap-y-2.5">
           <Button
-            disabled={false}
-            onClick={() => null}
+            disabled={signingIn}
+            onClick={handleProviderSignIn("google")}
             variant="outline"
             size="lg"
             className="w-full relative"
@@ -76,7 +86,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             Continue with Google
           </Button>
           <Button
-            disabled={false}
+            disabled={signingIn}
             onClick={handleProviderSignIn("github")}
             variant="outline"
             size="lg"
