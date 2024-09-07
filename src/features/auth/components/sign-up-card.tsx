@@ -27,6 +27,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
 
   const form = useForm({
     defaultValues: {
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -36,13 +37,13 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
   const { signIn } = useAuthActions();
 
   const handlePasswordSignUp = form.handleSubmit(
-    ({ email, password, confirmPassword }) => {
+    ({ name, email, password, confirmPassword }) => {
       if (password !== confirmPassword) {
         setError("Passwords do not match");
         return;
       }
       setSigningUp(true);
-      signIn("password", { email, password, flow: "signUp" })
+      signIn("password", { name, email, password, flow: "signUp" })
         .catch(() => {
           setError("Something went wrong!");
         })
@@ -75,6 +76,13 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
       )}
       <CardContent className="space-y-5 px-0 pb-0">
         <form className="space-y-2.5" onSubmit={handlePasswordSignUp}>
+          <Input
+            {...form.register("name", {
+              required: true,
+            })}
+            disabled={signingUp}
+            placeholder="Full name"
+          />
           <Input
             {...form.register("email", {
               required: true,
