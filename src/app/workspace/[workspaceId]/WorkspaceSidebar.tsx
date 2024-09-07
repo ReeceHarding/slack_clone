@@ -6,15 +6,16 @@ import {
   SendHorizonal,
 } from "lucide-react";
 
+import { useGetChannels } from "@/features/channels/api/useGetChannels";
+import { useCreateChannelModal } from "@/features/channels/store/useCreateChannelModal";
 import { useCurrentMember } from "@/features/members/api/useCurrentMember";
+import { useGetMembers } from "@/features/members/api/useGetMembers";
 import { useGetWorkspace } from "@/features/workspaces/api/useGetWorkspace";
 import { useWorkspaceId } from "@/hooks/useWorkspaceId";
 import { SidebarItem } from "./SidebarItem";
-import { WorkspaceHeader } from "./WorkspaceHeader";
-import { useGetChannels } from "@/features/channels/api/useGetChannels";
-import { WorkspaceSection } from "./WorkspaceSection";
-import { useGetMembers } from "@/features/members/api/useGetMembers";
 import { UserItem } from "./UserItem";
+import { WorkspaceHeader } from "./WorkspaceHeader";
+import { WorkspaceSection } from "./WorkspaceSection";
 
 export const WorkspaceSidebar = () => {
   const workspaceId = useWorkspaceId();
@@ -26,6 +27,8 @@ export const WorkspaceSidebar = () => {
   });
   const getChannels = useGetChannels({ workspaceId });
   const getMembers = useGetMembers({ workspaceId });
+
+  const setOpen = useCreateChannelModal((state) => state.setOpen);
 
   if (isLoadingMember || isLoadingWorkspace) {
     return (
@@ -54,7 +57,11 @@ export const WorkspaceSidebar = () => {
         <SidebarItem label="Threads" icon={MessageSquareText} id="threads" />
         <SidebarItem label="Drafts & Sent" icon={SendHorizonal} id="drafts" />
       </div>
-      <WorkspaceSection label="Channels" hint="New channel" onNew={() => null}>
+      <WorkspaceSection
+        label="Channels"
+        hint="New channel"
+        onNew={member.role === "admin" ? () => setOpen(true) : undefined}
+      >
         {getChannels.channels?.map((item) => (
           <SidebarItem
             key={item._id}

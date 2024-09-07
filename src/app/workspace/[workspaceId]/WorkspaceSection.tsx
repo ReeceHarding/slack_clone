@@ -46,6 +46,7 @@ export const WorkspaceSection = ({
             <Button
               variant="transparent"
               className="opacity-0 group-hover:opacity-100 transition-opacity ml-auto p-0.5 text-sm text-[#F9EDFFCC] size-6 shrink-0"
+              onClick={onNew}
             >
               <PlusIcon className="size-5" />
             </Button>
