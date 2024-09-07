@@ -89,7 +89,7 @@ export const PreferenceModal = ({
       <ConfirmDialog />
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="p-0 bg-gray-50 overflow-hidden">
-          <DialogHeader className="p-4 border-b bg-white">
+          <DialogHeader className="p-4 border-b">
             <DialogTitle>{initialVlaue}</DialogTitle>
           </DialogHeader>
           <div className="px-4 pb-4 flex flex-col gap-y-2">
@@ -105,7 +105,7 @@ export const PreferenceModal = ({
                   <p className="text-sm">{value}</p>
                 </div>
               </DialogTrigger>
-              <DialogContent className="bg-gray-50">
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Rename this workspace</DialogTitle>
                 </DialogHeader>
