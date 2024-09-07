@@ -49,6 +49,7 @@ export const CreateWorkspaceModal = () => {
             {...form.register("name", {
               required: true,
               minLength: 3,
+              maxLength: 80,
             })}
             disabled={isPending}
             autoFocus
