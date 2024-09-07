@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useCreateWorkspace } from "../api/useCreateWorkspace";
 import { useCreateWorkspaceModal } from "../store/useCreateWorkspaceModal";
-import { toast } from "sonner";
 
 export const CreateWorkspaceModal = () => {
   const router = useRouter();
@@ -22,7 +22,7 @@ export const CreateWorkspaceModal = () => {
     },
   });
 
-  const [open, setOpen] = useCreateWorkspaceModal();
+  const { open, setOpen } = useCreateWorkspaceModal();
 
   const { mutateAsync, isPending } = useCreateWorkspace();
 
