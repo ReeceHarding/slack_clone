@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useWorkspaceId } from "@/hooks/useWorkspaceId";
 import { useCreateChannel } from "../api/useCreateChannel";
 import { useCreateChannelModal } from "../store/useCreateChannelModal";
+import { toast } from "sonner";
 
 export const CreateChannelModal = () => {
   const router = useRouter();
@@ -36,12 +37,19 @@ export const CreateChannelModal = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const channelId = await mutateAsync({
+    mutateAsync({
       name,
       workspaceId,
-    });
-
-    handleClose();
+    })
+      .then((channelId) => {
+        router.push(`/workspace/${workspaceId}/channel/${channelId}`);
+        handleClose();
+        toast.success("Channel created");
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("Failed to create channel");
+      });
   };
 
   return (
