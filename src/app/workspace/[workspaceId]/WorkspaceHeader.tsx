@@ -11,8 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Doc } from "../../../../convex/_generated/dataModel";
-import { PreferenceModal } from "./PreferenceModal";
 import { InviteModal } from "./InviteModal";
+import { PreferenceModal } from "./PreferenceModal";
 
 interface WorkspaceHeaderProps {
   workspace: Doc<"workspaces">;
