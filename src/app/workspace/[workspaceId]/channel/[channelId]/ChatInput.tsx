@@ -6,6 +6,8 @@ import { useCreateMessage } from "@/features/messages/api/useCreateMessage";
 import { useChannelId } from "@/hooks/useChannelId";
 import { useWorkspaceId } from "@/hooks/useWorkspaceId";
 import { toast } from "sonner";
+import { useGenerateUploadUrl } from "@/features/upload/api/useGenerateUploadUrl";
+import { Id } from "../../../../../../convex/_generated/dataModel";
 
 const Editor = dynamic(() => import("@/components/Editor"), { ssr: false });
 
@@ -13,13 +15,22 @@ interface ChatInputProps {
   placeholder: string;
 }
 
+type CreateMessageValues = {
+  channelId: Id<"channels">;
+  workspaceId: Id<"workspaces">;
+  body: string;
+  image?: Id<"_storage">;
+};
+
 export const ChatInput = ({ placeholder }: ChatInputProps) => {
   const editorRef = useRef<Quill | null>(null);
   const [editorKey, setEditorKey] = useState(0);
+  const [isPending, setIsPending] = useState(false);
 
   const workspaceId = useWorkspaceId();
   const channelId = useChannelId();
   const createMessage = useCreateMessage();
+  const generateUploadUrl = useGenerateUploadUrl();
 
   const handleSubmit = async ({
     body,
@@ -29,15 +40,40 @@ export const ChatInput = ({ placeholder }: ChatInputProps) => {
     image: File | null;
   }) => {
     try {
-      await createMessage.mutateAsync({
+      setIsPending(true);
+      editorRef.current?.enable(false);
+
+      const values: CreateMessageValues = {
         body,
         workspaceId,
         channelId,
-      });
+        image: undefined,
+      };
+
+      if (image) {
+        const url = await generateUploadUrl.mutateAsync({});
+
+        const result = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": image.type },
+          body: image,
+        });
+
+        if (!result.ok) {
+          throw new Error("Failed to upload image");
+        }
+
+        const { storageId } = await result.json();
+
+        values.image = storageId;
+      }
+      await createMessage.mutateAsync(values);
       setEditorKey((prev) => prev + 1);
     } catch (error) {
       toast.error("Failed to send message");
     } finally {
+      setIsPending(false);
+      editorRef.current?.enable(true);
     }
   };
 
@@ -47,7 +83,7 @@ export const ChatInput = ({ placeholder }: ChatInputProps) => {
         key={editorKey}
         placeholder={placeholder}
         onSubmit={handleSubmit}
-        disabled={createMessage.isPending}
+        disabled={isPending}
         innerRef={editorRef}
       />
     </div>
