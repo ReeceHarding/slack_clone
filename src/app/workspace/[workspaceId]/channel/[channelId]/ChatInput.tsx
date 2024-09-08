@@ -1,12 +1,12 @@
 import dynamic from "next/dynamic";
 import Quill from "quill";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { useCreateMessage } from "@/features/messages/api/useCreateMessage";
+import { useGenerateUploadUrl } from "@/features/upload/api/useGenerateUploadUrl";
 import { useChannelId } from "@/hooks/useChannelId";
 import { useWorkspaceId } from "@/hooks/useWorkspaceId";
-import { toast } from "sonner";
-import { useGenerateUploadUrl } from "@/features/upload/api/useGenerateUploadUrl";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 
 const Editor = dynamic(() => import("@/components/Editor"), { ssr: false });
