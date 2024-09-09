@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Loader } from "lucide-react";
 
+import { MessageList } from "@/components/MessageList";
 import { useGetChannel } from "@/features/channels/api/useGetChannel";
 import { useGetMessages } from "@/features/messages/api/useGetMessages";
 import { useChannelId } from "@/hooks/useChannelId";
@@ -14,7 +15,7 @@ const ChannelPage = () => {
   const getChannel = useGetChannel({ id: channelId });
   const getMessages = useGetMessages({ channelId });
 
-  if (getChannel.isLoading) {
+  if (getChannel.isLoading || getMessages.status === "LoadingFirstPage") {
     return (
       <div className="h-full flex-1 flex items-center justify-center">
         <Loader className="animate-spin size-5 text-muted-foreground" />
@@ -34,7 +35,14 @@ const ChannelPage = () => {
   return (
     <div className="flex flex-col h-full">
       <Header title={getChannel.data.name} />
-      <div className="flex-1">{JSON.stringify(getMessages.results)}</div>
+      <MessageList
+        channelName={getChannel.data.name}
+        channelCreationTime={getChannel.data._creationTime}
+        data={getMessages.results}
+        loadMore={getMessages.loadMore}
+        isLoadingMore={getMessages.status === "LoadingMore"}
+        canLoadMore={getMessages.status === "CanLoadMore"}
+      />
       <ChatInput placeholder={`Message # ${getChannel.data.name}`} />
     </div>
   );
