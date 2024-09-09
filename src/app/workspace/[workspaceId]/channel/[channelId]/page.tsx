@@ -1,15 +1,18 @@
 "use client";
 
-import { useGetChannel } from "@/features/channels/api/useGetChannel";
-import { useChannelId } from "@/hooks/useChannelId";
 import { AlertTriangle, Loader } from "lucide-react";
-import { Header } from "./Header";
+
+import { useGetChannel } from "@/features/channels/api/useGetChannel";
+import { useGetMessages } from "@/features/messages/api/useGetMessages";
+import { useChannelId } from "@/hooks/useChannelId";
 import { ChatInput } from "./ChatInput";
+import { Header } from "./Header";
 
 const ChannelPage = () => {
-  const channeld = useChannelId();
+  const channelId = useChannelId();
 
-  const getChannel = useGetChannel({ id: channeld });
+  const getChannel = useGetChannel({ id: channelId });
+  const getMessages = useGetMessages({ channelId });
 
   if (getChannel.isLoading) {
     return (
@@ -31,7 +34,7 @@ const ChannelPage = () => {
   return (
     <div className="flex flex-col h-full">
       <Header title={getChannel.data.name} />
-      <div className="flex-1"></div>
+      <div className="flex-1">{JSON.stringify(getMessages.results)}</div>
       <ChatInput placeholder={`Message # ${getChannel.data.name}`} />
     </div>
   );
