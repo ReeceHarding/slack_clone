@@ -2,15 +2,17 @@ import dayjs, { Dayjs } from "dayjs";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
 
+import { useRemoveMessage } from "@/features/messages/api/useRemoveMessage";
 import { useUpdateMessage } from "@/features/messages/api/useUpdateMessage";
+import { useToggleReaction } from "@/features/reactions/api/useToggleReaction";
+import { useConfirm } from "@/hooks/useConfirm";
+import { cn } from "@/lib/utils";
 import { Doc, Id } from "../../convex/_generated/dataModel";
 import { Hint } from "./Hint";
 import { Thumbnail } from "./Thumbnail";
 import { Toolbar } from "./Toolbar";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { cn } from "@/lib/utils";
-import { useRemoveMessage } from "@/features/messages/api/useRemoveMessage";
-import { useConfirm } from "@/hooks/useConfirm";
+import { Reactions } from "./Reactions";
 
 const Renderer = dynamic(() => import("@/components/Renderer"), { ssr: false });
 const Editor = dynamic(() => import("@/components/Editor"), { ssr: false });
@@ -71,8 +73,12 @@ export const Message = ({
   );
   const updateMessage = useUpdateMessage();
   const removeMessage = useRemoveMessage();
+  const toggleReaction = useToggleReaction();
 
-  const isPending = updateMessage.isPending || removeMessage.isPending;
+  const isPending =
+    updateMessage.isPending ||
+    removeMessage.isPending ||
+    toggleReaction.isPending;
 
   const handleUpdate = ({ body }: { body: string }) => {
     updateMessage
@@ -107,6 +113,18 @@ export const Message = ({
       .catch((error) => {
         console.error(error);
         toast.error("Failed to delete message");
+      });
+  };
+
+  const handleReaction = (value: string) => {
+    toggleReaction
+      .mutateAsync({
+        messageId: id,
+        value,
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("Failed to toggle reaction");
       });
   };
 
@@ -147,6 +165,7 @@ export const Message = ({
                     (edited)
                   </span>
                 ) : null}
+                <Reactions data={reactions} onChange={handleReaction} />
               </div>
             )}
           </div>
@@ -158,7 +177,7 @@ export const Message = ({
               onEdit={() => setEditingId(id)}
               onThread={() => null}
               onDelete={handleDelete}
-              onReaction={() => null}
+              onReaction={handleReaction}
             />
           )}
         </div>
@@ -217,6 +236,7 @@ export const Message = ({
               {updatedAt ? (
                 <span className="text-xs text-muted-foreground">(edited)</span>
               ) : null}
+              <Reactions data={reactions} onChange={handleReaction} />
             </div>
           )}
         </div>
@@ -228,7 +248,7 @@ export const Message = ({
             onEdit={() => setEditingId(id)}
             onThread={() => null}
             onDelete={handleDelete}
-            onReaction={() => null}
+            onReaction={handleReaction}
           />
         )}
       </div>
