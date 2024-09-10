@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Doc, Id } from "../../convex/_generated/dataModel";
 import { Hint } from "./Hint";
 import { Thumbnail } from "./Thumbnail";
+import { Toolbar } from "./Toolbar";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 const Renderer = dynamic(() => import("@/components/Renderer"), { ssr: false });
@@ -55,6 +56,7 @@ export const Message = ({
   threadCount,
   threadImage,
   threadTimestamp,
+  isAuthor,
   setEditingId,
 }: MessageProps) => {
   if (isCompact) {
@@ -111,6 +113,17 @@ export const Message = ({
           ) : null}
         </div>
       </div>
+      {!isEditing && (
+        <Toolbar
+          isAuthor={isAuthor}
+          isPending={false}
+          hideThreadButton={false}
+          onEdit={() => setEditingId(id)}
+          onThread={() => null}
+          onDelete={() => null}
+          onReaction={() => null}
+        />
+      )}
     </div>
   );
 };
