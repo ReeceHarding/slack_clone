@@ -5,7 +5,12 @@ import isYesterday from "dayjs/plugin/isYesterday";
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
+import { useCurrentMember } from "@/features/members/api/useCurrentMember";
+import { useWorkspaceId } from "@/hooks/useWorkspaceId";
+import { useState } from "react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
+import { ChannelHero } from "./ChannelHero";
 import { Message } from "./Message";
 
 interface MessageListProps {
@@ -40,6 +45,14 @@ export const MessageList = ({
   variant = "channel",
   loadMore,
 }: MessageListProps) => {
+  const [editingId, setEditingId] = useState<Id<"messages"> | null>(null);
+
+  const workspaceId = useWorkspaceId();
+
+  const currentMember = useCurrentMember({
+    workspaceId,
+  });
+
   const groupedMessages = data?.reduce(
     (groups, message) => {
       const date = new Date(message._creationTime);
@@ -86,16 +99,19 @@ export const MessageList = ({
                 threadCount={message.threadCount}
                 threadImage={message.threadImage}
                 threadTimestamp={message.threadTimestamp}
-                isEditing={false}
-                setEditingId={() => null}
+                isEditing={editingId === message._id}
+                setEditingId={setEditingId}
                 isCompact={isCompact}
-                hideThreadButton={false}
-                isAuthor={false}
+                hideThreadButton={variant === "thread"}
+                isAuthor={currentMember.member?._id === message.memberId}
               />
             );
           })}
         </div>
       ))}
+      {variant === "channel" && channelName && channelCreationTime && (
+        <ChannelHero name={channelName} creationTime={channelCreationTime} />
+      )}
     </div>
   );
 };
