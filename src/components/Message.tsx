@@ -14,6 +14,7 @@ import { Toolbar } from "./Toolbar";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Reactions } from "./Reactions";
 import { usePanel } from "@/hooks/usePanel";
+import { ThreadBar } from "./Threadbar";
 
 const Renderer = dynamic(() => import("@/components/Renderer"), { ssr: false });
 const Editor = dynamic(() => import("@/components/Editor"), { ssr: false });
@@ -40,6 +41,7 @@ interface MessageProps {
   threadCount?: number;
   threadImage?: string;
   threadTimestamp?: number;
+  threadName?: string;
   setEditingId: (id: Id<"messages"> | null) => void;
 }
 
@@ -65,6 +67,7 @@ export const Message = ({
   threadCount,
   threadImage,
   threadTimestamp,
+  threadName,
   isAuthor,
   setEditingId,
 }: MessageProps) => {
@@ -170,6 +173,13 @@ export const Message = ({
                   </span>
                 ) : null}
                 <Reactions data={reactions} onChange={handleReaction} />
+                <ThreadBar
+                  count={threadCount}
+                  image={threadImage}
+                  name={threadName}
+                  timestamp={threadTimestamp}
+                  onClick={() => openMessage(id)}
+                />
               </div>
             )}
           </div>
@@ -241,6 +251,13 @@ export const Message = ({
                 <span className="text-xs text-muted-foreground">(edited)</span>
               ) : null}
               <Reactions data={reactions} onChange={handleReaction} />
+              <ThreadBar
+                count={threadCount}
+                image={threadImage}
+                name={threadName}
+                timestamp={threadTimestamp}
+                onClick={() => openMessage(id)}
+              />
             </div>
           )}
         </div>
