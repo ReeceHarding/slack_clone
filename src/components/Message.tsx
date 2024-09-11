@@ -6,15 +6,15 @@ import { useRemoveMessage } from "@/features/messages/api/useRemoveMessage";
 import { useUpdateMessage } from "@/features/messages/api/useUpdateMessage";
 import { useToggleReaction } from "@/features/reactions/api/useToggleReaction";
 import { useConfirm } from "@/hooks/useConfirm";
+import { usePanel } from "@/hooks/usePanel";
 import { cn } from "@/lib/utils";
 import { Doc, Id } from "../../convex/_generated/dataModel";
 import { Hint } from "./Hint";
+import { Reactions } from "./Reactions";
+import { ThreadBar } from "./ThreadBar";
 import { Thumbnail } from "./Thumbnail";
 import { Toolbar } from "./Toolbar";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Reactions } from "./Reactions";
-import { usePanel } from "@/hooks/usePanel";
-import { ThreadBar } from "./Threadbar";
 
 const Renderer = dynamic(() => import("@/components/Renderer"), { ssr: false });
 const Editor = dynamic(() => import("@/components/Editor"), { ssr: false });
@@ -71,7 +71,12 @@ export const Message = ({
   isAuthor,
   setEditingId,
 }: MessageProps) => {
-  const { parentMessageId, openMessage, closeMessage } = usePanel();
+  const {
+    parentMessageId,
+    openMessage,
+    openProfile,
+    close: closeMessage,
+  } = usePanel();
   const [ConfirmDialog, confirm] = useConfirm(
     "Delete message?",
     "Are you sure you want to delete this message? This cannot be undone"
@@ -187,7 +192,7 @@ export const Message = ({
             <Toolbar
               isAuthor={isAuthor}
               isPending={isPending}
-              hideThreadButton={false}
+              hideThreadButton={hideThreadButton}
               onEdit={() => setEditingId(id)}
               onThread={() => openMessage(id)}
               onDelete={handleRemove}
@@ -211,7 +216,7 @@ export const Message = ({
         )}
       >
         <div className="flex items-start gap-2">
-          <button>
+          <button onClick={() => openProfile(memberId)}>
             <Avatar>
               <AvatarImage src={authorImage} />
               <AvatarFallback>
@@ -234,7 +239,7 @@ export const Message = ({
               <div className="text-sm">
                 <button
                   className="font-bold text-primary hover:underline"
-                  onClick={() => null}
+                  onClick={() => openProfile(memberId)}
                 >
                   {authorName}
                 </button>
@@ -265,7 +270,7 @@ export const Message = ({
           <Toolbar
             isAuthor={isAuthor}
             isPending={isPending}
-            hideThreadButton={false}
+            hideThreadButton={hideThreadButton}
             onEdit={() => setEditingId(id)}
             onThread={() => openMessage(id)}
             onDelete={handleRemove}
