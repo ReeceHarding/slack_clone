@@ -7,6 +7,7 @@ import { useMemberId } from "@/hooks/useMemberId";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { ChatInput } from "./ChatInput";
 import { Header } from "./Header";
+import { usePanel } from "@/hooks/usePanel";
 
 interface ConversationProps {
   id: Id<"conversations">;
@@ -18,6 +19,7 @@ export const Conversation = ({ id }: ConversationProps) => {
   const getMessages = useGetMessages({
     conversationId: id,
   });
+  const { openProfile } = usePanel();
 
   if (getMember.isLoading || getMessages.status === "LoadingFirstPage") {
     return (
@@ -32,7 +34,7 @@ export const Conversation = ({ id }: ConversationProps) => {
       <Header
         memberName={getMember.data?.user.name}
         memberImage={getMember.data?.user.image}
-        onClick={() => null}
+        onClick={() => openProfile(memberId)}
       />
       <MessageList
         variant="conversation"
