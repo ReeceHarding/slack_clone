@@ -25,7 +25,7 @@ const MemberIdPage = () => {
         console.error(error);
         toast.error("Failed to create conversation");
       });
-  }, [memberId, workspaceId, createOrGetConversation.mutateAsync]);
+  }, [memberId, workspaceId, createOrGetConversation]);
 
   if (createOrGetConversation.isPending) {
     return (

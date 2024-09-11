@@ -25,7 +25,7 @@ const JoinPage = () => {
     if (workspaceInfo?.isMember) {
       router.push(`/workspace/${workspaceId}`);
     }
-  }, [workspaceInfo?.isMember]);
+  }, [workspaceInfo?.isMember, router, workspaceId]);
 
   const handleComplete = (value: string) => {
     join

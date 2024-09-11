@@ -1,6 +1,5 @@
 import "quill/dist/quill.snow.css";
 
-import { EmojiClickData } from "emoji-picker-react";
 import { ImageIcon, Smile, XIcon } from "lucide-react";
 import Quill, { QuillOptions } from "quill";
 import { Delta, Op } from "quill/core";
