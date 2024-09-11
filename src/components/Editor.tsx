@@ -1,5 +1,6 @@
 import "quill/dist/quill.snow.css";
 
+import { EmojiClickData } from "emoji-picker-react";
 import { ImageIcon, Smile, XIcon } from "lucide-react";
 import Quill, { QuillOptions } from "quill";
 import { Delta, Op } from "quill/core";
@@ -15,10 +16,10 @@ import { MdSend } from "react-icons/md";
 import { PiTextAa } from "react-icons/pi";
 
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import { EmojiPopover } from "./EmojiPopover";
 import { Hint } from "./Hint";
 import { Button } from "./ui/button";
-import Image from "next/image";
 
 type EditorValue = {
   image: File | null;
@@ -157,10 +158,10 @@ const Editor = ({
     }
   };
 
-  const handleEmojiSelect = (emoji: any) => {
+  const handleEmojiSelect = (emoji: string) => {
     const quill = quillRef.current;
 
-    quill?.insertText(quill?.getSelection()?.index || 0, emoji.native);
+    quill?.insertText(quill?.getSelection()?.index || 0, emoji);
   };
 
   return (
