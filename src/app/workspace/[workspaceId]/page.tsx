@@ -44,7 +44,7 @@ const WorkspaceIdPage = () => {
       setOpen(true);
     }
   }, [
-    getWorkspace.isLoading,
+    getWorkspace,
     getChannels.isLoading,
     currentMember.isLoading,
     currentMember.member,
