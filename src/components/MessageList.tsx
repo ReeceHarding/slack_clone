@@ -1,18 +1,19 @@
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import isYesterday from "dayjs/plugin/isYesterday";
-
-dayjs.extend(isToday);
-dayjs.extend(isYesterday);
+import { Loader } from "lucide-react";
+import { useState } from "react";
 
 import { useCurrentMember } from "@/features/members/api/useCurrentMember";
 import { useWorkspaceId } from "@/hooks/useWorkspaceId";
-import { useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { ChannelHero } from "./ChannelHero";
+import { ConversationHero } from "./ConversationHero";
 import { Message } from "./Message";
-import { Loader } from "lucide-react";
+
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
 
 interface MessageListProps {
   memberName?: string;
@@ -139,6 +140,9 @@ export const MessageList = ({
       )}
       {variant === "channel" && channelName && channelCreationTime && (
         <ChannelHero name={channelName} creationTime={channelCreationTime} />
+      )}
+      {variant === "conversation" && memberName && (
+        <ConversationHero name={memberName} image={memberImage} />
       )}
     </div>
   );

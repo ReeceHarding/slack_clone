@@ -44,7 +44,7 @@ export const WorkspaceHeader = ({
           <DropdownMenuTrigger asChild>
             <Button
               variant="transparent"
-              className="font-semibold text-lh w-auto p-1.5 overflow-hidden"
+              className="font-semibold text-lg w-auto p-1.5 overflow-hidden"
               size="sm"
             >
               <span className="truncate">{workspace.name}</span>
