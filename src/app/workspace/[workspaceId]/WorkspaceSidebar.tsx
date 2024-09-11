@@ -6,18 +6,19 @@ import {
   SendHorizonal,
 } from "lucide-react";
 
+import { InDevelopmentHint } from "@/components/InDevelopmentHint";
 import { useGetChannels } from "@/features/channels/api/useGetChannels";
 import { useCreateChannelModal } from "@/features/channels/store/useCreateChannelModal";
 import { useCurrentMember } from "@/features/members/api/useCurrentMember";
 import { useGetMembers } from "@/features/members/api/useGetMembers";
 import { useGetWorkspace } from "@/features/workspaces/api/useGetWorkspace";
+import { useChannelId } from "@/hooks/useChannelId";
+import { useMemberId } from "@/hooks/useMemberId";
 import { useWorkspaceId } from "@/hooks/useWorkspaceId";
 import { SidebarItem } from "./SidebarItem";
 import { UserItem } from "./UserItem";
 import { WorkspaceHeader } from "./WorkspaceHeader";
 import { WorkspaceSection } from "./WorkspaceSection";
-import { useChannelId } from "@/hooks/useChannelId";
-import { useMemberId } from "@/hooks/useMemberId";
 
 export const WorkspaceSidebar = () => {
   const workspaceId = useWorkspaceId();
@@ -59,8 +60,23 @@ export const WorkspaceSidebar = () => {
         isAdmin={member.role === "admin"}
       />
       <div className="flex flex-col px-2 mt-3">
-        <SidebarItem label="Threads" icon={MessageSquareText} id="threads" />
-        <SidebarItem label="Drafts & Sent" icon={SendHorizonal} id="drafts" />
+        {/* TODO: Implement threads and Drafts & Sent features */}
+        <InDevelopmentHint>
+          <SidebarItem
+            label="Threads"
+            icon={MessageSquareText}
+            id="threads"
+            disabled
+          />
+        </InDevelopmentHint>
+        <InDevelopmentHint>
+          <SidebarItem
+            label="Drafts & Sent"
+            icon={SendHorizonal}
+            id="drafts"
+            disabled
+          />
+        </InDevelopmentHint>
       </div>
       <WorkspaceSection
         label="Channels"
@@ -77,11 +93,7 @@ export const WorkspaceSidebar = () => {
           />
         ))}
       </WorkspaceSection>
-      <WorkspaceSection
-        label="Direct Messages"
-        hint="New direct message"
-        onNew={() => null}
-      >
+      <WorkspaceSection label="Direct Messages" hint="New direct message">
         {getMembers.members?.map((item) => (
           <UserItem
             id={item._id}

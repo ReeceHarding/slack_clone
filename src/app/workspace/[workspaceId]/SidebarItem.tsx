@@ -10,6 +10,7 @@ interface SidebarItemProps {
   label: string;
   id: string;
   icon: LucideIcon | IconType;
+  disabled?: boolean;
   variant?: VariantProps<typeof sidebarItemVariants>["variant"];
 }
 
@@ -32,9 +33,23 @@ export const SidebarItem = ({
   icon: Icon,
   id,
   label,
+  disabled,
   variant,
 }: SidebarItemProps) => {
   const workspaceId = useWorkspaceId();
+
+  if (disabled) {
+    return (
+      <Button
+        variant="transparent"
+        className={cn(sidebarItemVariants({ variant }))}
+        disabled={disabled}
+      >
+        <Icon className="size-3.5 mr-1 shrink-0" />
+        <span className="text-sm truncate">{label}</span>
+      </Button>
+    );
+  }
 
   return (
     <Button

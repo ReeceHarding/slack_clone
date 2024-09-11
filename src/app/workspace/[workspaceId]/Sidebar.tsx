@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "@/features/auth/components/user-button";
 import { SidebarButton } from "./SidebarButton";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import { InDevelopmentHint } from "@/components/InDevelopmentHint";
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -18,9 +19,15 @@ export const Sidebar = () => {
         label="Home"
         isActive={pathname.includes("/workspace")}
       />
-      <SidebarButton icon={MessagesSquare} label="DMs" />
-      <SidebarButton icon={Bell} label="Activity" />
-      <SidebarButton icon={MoreHorizontal} label="More" />
+      <InDevelopmentHint>
+        <SidebarButton icon={MessagesSquare} label="DMs" disabled />
+      </InDevelopmentHint>
+      <InDevelopmentHint>
+        <SidebarButton icon={Bell} label="Activity" disabled />
+      </InDevelopmentHint>
+      <InDevelopmentHint>
+        <SidebarButton icon={MoreHorizontal} label="More" disabled />
+      </InDevelopmentHint>
       <div className="flex flex-col items-center justify-center gap-y-1 mt-auto">
         <UserButton />
       </div>

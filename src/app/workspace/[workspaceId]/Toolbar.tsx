@@ -4,6 +4,7 @@ import { Info, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { InDevelopmentHint } from "@/components/InDevelopmentHint";
 import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
@@ -79,9 +80,12 @@ export const Toolbar = () => {
         </CommandDialog>
       </div>
       <div className="ml-auto flex-1 flex items-center justify-end">
-        <Button variant="transparent" size="iconSm">
-          <Info className="size-5 text-white" />
-        </Button>
+        {/* TODO: Implement info button */}
+        <InDevelopmentHint>
+          <Button variant="transparent" size="iconSm" disabled>
+            <Info className="size-5 text-white" />
+          </Button>
+        </InDevelopmentHint>
       </div>
     </div>
   );

@@ -8,12 +8,14 @@ interface SidebarButtonProps {
   icon: LucideIcon | IconType;
   label: string;
   isActive?: boolean;
+  disabled?: boolean;
 }
 
 export const SidebarButton = ({
   icon: Icon,
   label,
   isActive,
+  disabled,
 }: SidebarButtonProps) => {
   return (
     <div className="flex flex-col items-center justify-center gap-y-0.5 cursor-pointer group">
@@ -23,6 +25,7 @@ export const SidebarButton = ({
           "size-9 p-2 group-hover:bg-accent/20",
           isActive && "bg-accent/20"
         )}
+        disabled={disabled}
       >
         <Icon className="size-5 text-white group-hover:scale-110 transition-all" />
       </Button>
