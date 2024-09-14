@@ -24,7 +24,7 @@ export const Toolbar = () => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
 
-  const { workspace } = useGetWorkspace({ id: workspaceId });
+  const { data: workspace } = useGetWorkspace({ id: workspaceId });
   const getChannels = useGetChannels({ workspaceId });
   const getMembers = useGetMembers({ workspaceId });
 
@@ -57,7 +57,7 @@ export const Toolbar = () => {
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup heading="Channels">
-              {getChannels.channels?.map((channel) => (
+              {getChannels.data?.map((channel) => (
                 <CommandItem
                   key={channel._id}
                   onSelect={handleChannelClick(channel._id)}
@@ -67,7 +67,7 @@ export const Toolbar = () => {
               ))}
             </CommandGroup>
             <CommandGroup heading="Members">
-              {getMembers.members?.map((member) => (
+              {getMembers.data?.map((member) => (
                 <CommandItem
                   key={member._id}
                   onSelect={handleMemberClick(member._id)}

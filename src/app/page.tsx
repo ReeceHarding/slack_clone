@@ -10,7 +10,7 @@ import { useCreateWorkspaceModal } from "@/features/workspaces/store/useCreateWo
 export default function Home() {
   const router = useRouter();
   const { open, setOpen } = useCreateWorkspaceModal();
-  const { isLoading, workspaces } = useGetWorkspaces();
+  const { isLoading, data: workspaces } = useGetWorkspaces();
 
   const workspaceId = useMemo(() => workspaces?.[0]?._id, [workspaces]);
 

@@ -197,7 +197,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
                   setEditingId={setEditingId}
                   isCompact={isCompact}
                   hideThreadButton
-                  isAuthor={currentMember.member?._id === message.memberId}
+                  isAuthor={currentMember.data?._id === message.memberId}
                 />
               );
             })}
@@ -246,7 +246,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
           isEditing={editingId === getMessage.data._id}
           setEditingId={setEditingId}
           hideThreadButton
-          isAuthor={currentMember.member?._id === getMessage.data.memberId}
+          isAuthor={currentMember.data?._id === getMessage.data.memberId}
         />
       </div>
       <div className="px-4">

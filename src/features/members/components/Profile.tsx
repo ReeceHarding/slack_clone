@@ -158,8 +158,8 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
         </div>
         <div className="flex flex-col p-4">
           <p className="text-xl font-bold">{getMember.data.user.name}</p>
-          {currentMember.member?.role === "admin" &&
-            currentMember.member?._id !== memberId && (
+          {currentMember.data?.role === "admin" &&
+            currentMember.data?._id !== memberId && (
               <div className="flex items-center gap-2 mt-4">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -192,8 +192,8 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
                 </Button>
               </div>
             )}
-          {currentMember.member?.role !== "admin" &&
-            currentMember.member?._id === memberId && (
+          {currentMember.data?.role !== "admin" &&
+            currentMember.data?._id === memberId && (
               <div className="mt-4">
                 <Button
                   variant="outline"

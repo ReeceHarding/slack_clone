@@ -25,10 +25,10 @@ export const WorkspaceSidebar = () => {
   const channelId = useChannelId();
   const memberId = useMemberId();
 
-  const { isLoading: isLoadingMember, member } = useCurrentMember({
+  const currentMember = useCurrentMember({
     workspaceId,
   });
-  const { isLoading: isLoadingWorkspace, workspace } = useGetWorkspace({
+  const getWorkspace = useGetWorkspace({
     id: workspaceId,
   });
   const getChannels = useGetChannels({ workspaceId });
@@ -36,7 +36,7 @@ export const WorkspaceSidebar = () => {
 
   const setOpen = useCreateChannelModal((state) => state.setOpen);
 
-  if (isLoadingMember || isLoadingWorkspace) {
+  if (currentMember.isLoading || getWorkspace.isLoading) {
     return (
       <div className="flex flex-col bg-[#5E2C5F] h-full items-center justify-center">
         <Loader className="size-5 text-white animate-spin" />
@@ -44,7 +44,7 @@ export const WorkspaceSidebar = () => {
     );
   }
 
-  if (!workspace || !member) {
+  if (!getWorkspace.data || !currentMember.data) {
     return (
       <div className="flex flex-col gap-y-2 bg-[#5E2C5F] h-full items-center justify-center">
         <AlertTriangle className="size-5 text-white" />
@@ -56,8 +56,8 @@ export const WorkspaceSidebar = () => {
   return (
     <div className="flex flex-col gap-y-2 bg-[#5E2C5F] h-full">
       <WorkspaceHeader
-        workspace={workspace}
-        isAdmin={member.role === "admin"}
+        workspace={getWorkspace.data}
+        isAdmin={currentMember.data.role === "admin"}
       />
       <div className="flex flex-col px-2 mt-3">
         {/* TODO: Implement threads and Drafts & Sent features */}
@@ -81,9 +81,9 @@ export const WorkspaceSidebar = () => {
       <WorkspaceSection
         label="Channels"
         hint="New channel"
-        onNew={member.role === "admin" ? () => setOpen(true) : undefined}
+        onNew={currentMember.data.role === "admin" ? () => setOpen(true) : undefined}
       >
-        {getChannels.channels?.map((item) => (
+        {getChannels.data?.map((item) => (
           <SidebarItem
             key={item._id}
             label={item.name}
@@ -94,7 +94,7 @@ export const WorkspaceSidebar = () => {
         ))}
       </WorkspaceSection>
       <WorkspaceSection label="Direct Messages" hint="New direct message">
-        {getMembers.members?.map((item) => (
+        {getMembers.data?.map((item) => (
           <UserItem
             id={item._id}
             image={item.user.image}

@@ -106,7 +106,7 @@ export const MessageList = ({
                 setEditingId={setEditingId}
                 isCompact={isCompact}
                 hideThreadButton={variant === "thread"}
-                isAuthor={currentMember.member?._id === message.memberId}
+                isAuthor={currentMember.data?._id === message.memberId}
               />
             );
           })}

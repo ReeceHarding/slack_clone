@@ -21,7 +21,7 @@ export const Reactions = ({ data, onChange }: ReactionsProps) => {
   const workspaceId = useWorkspaceId();
   const currentMember = useCurrentMember({ workspaceId });
 
-  if (data.length === 0 || !currentMember.member?._id) {
+  if (data.length === 0 || !currentMember.data?._id) {
     return null;
   }
 
@@ -35,8 +35,8 @@ export const Reactions = ({ data, onChange }: ReactionsProps) => {
           <button
             className={cn(
               "h-6 px-2 rounded-full bg-slate-200/70 border border-transparent text-slate-800 flex items-center gap-x-1",
-              currentMember.member &&
-                reaction.memberIds.includes(currentMember.member?._id) &&
+              currentMember.data &&
+                reaction.memberIds.includes(currentMember.data?._id) &&
                 "bg-blue-100/70 border-blue-500 text-blue-500"
             )}
             onClick={() => onChange(reaction.value)}
@@ -45,8 +45,8 @@ export const Reactions = ({ data, onChange }: ReactionsProps) => {
             <span
               className={cn(
                 "text-xs text-muted-foreground font-semibold",
-                currentMember.member &&
-                  reaction.memberIds.includes(currentMember.member?._id) &&
+                currentMember.data &&
+                  reaction.memberIds.includes(currentMember.data?._id) &&
                   "text-blue-500"
               )}
             >

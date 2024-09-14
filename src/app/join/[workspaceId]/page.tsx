@@ -18,7 +18,7 @@ const JoinPage = () => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
 
-  const { isLoading, workspaceInfo } = useGetWorkspaceInfo({ id: workspaceId });
+  const { isLoading, data: workspaceInfo } = useGetWorkspaceInfo({ id: workspaceId });
   const join = useJoin();
 
   useEffect(() => {

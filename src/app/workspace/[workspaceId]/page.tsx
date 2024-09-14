@@ -19,13 +19,13 @@ const WorkspaceIdPage = () => {
   const getChannels = useGetChannels({ workspaceId });
 
   const channelId = useMemo(
-    () => getChannels.channels?.[0]?._id,
-    [getChannels.channels]
+    () => getChannels.data?.[0]?._id,
+    [getChannels.data]
   );
 
   const isAdmin = useMemo(
-    () => currentMember.member?.role === "admin",
-    [currentMember.member?.role]
+    () => currentMember.data?.role === "admin",
+    [currentMember.data?.role]
   );
 
   useEffect(() => {
@@ -33,8 +33,8 @@ const WorkspaceIdPage = () => {
       getWorkspace.isLoading ||
       getChannels.isLoading ||
       currentMember.isLoading ||
-      !getWorkspace.workspace ||
-      !currentMember.member
+      !getWorkspace.data ||
+      !currentMember.data
     ) {
       return;
     }
@@ -47,7 +47,7 @@ const WorkspaceIdPage = () => {
     getWorkspace,
     getChannels.isLoading,
     currentMember.isLoading,
-    currentMember.member,
+    currentMember.data,
     isAdmin,
     channelId,
     open,
@@ -64,7 +64,7 @@ const WorkspaceIdPage = () => {
     );
   }
 
-  if (!getWorkspace.workspace || !currentMember.member) {
+  if (!getWorkspace.data || !currentMember.data) {
     return (
       <div className="h-full flex-1 flex items-center justify-center flex-col gap-2">
         <TriangleAlert className="size-6 text-muted-foreground" />

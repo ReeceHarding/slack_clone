@@ -8,11 +8,11 @@ interface UseGetChannelsProps {
 }
 
 export const useGetChannels = ({ workspaceId }: UseGetChannelsProps) => {
-  const channels = useQuery(api.channels.get, { workspaceId });
-  const isLoading = channels === undefined;
+  const data = useQuery(api.channels.get, { workspaceId });
+  const isLoading = data === undefined;
 
   return {
-    channels,
+    data,
     isLoading,
   };
 };

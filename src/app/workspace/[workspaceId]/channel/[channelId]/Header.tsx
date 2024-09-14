@@ -50,7 +50,7 @@ export const Header = ({ title }: HeaderProps) => {
   };
 
   const handleEditOpen = (open: boolean) => {
-    if (currentMember.member?.role !== "admin") return;
+    if (currentMember.data?.role !== "admin") return;
 
     setEditOpen(open);
   };
@@ -119,7 +119,7 @@ export const Header = ({ title }: HeaderProps) => {
                   <div className="px-5 py-4 bg-white rounded-lg border cursor-pointer hover:bg-gray-50">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold">Channel name</p>
-                      {currentMember.member?.role === "admin" && (
+                      {currentMember.data?.role === "admin" && (
                         <p className="text-sm text-[#1264a3] hover:underline font-semibold">
                           Edit
                         </p>
@@ -157,7 +157,7 @@ export const Header = ({ title }: HeaderProps) => {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              {currentMember.member?.role === "admin" && (
+              {currentMember.data?.role === "admin" && (
                 <Button
                   className="flex justify-start items-center gap-x-2 px-5 py-4 bg-white rounded-lg cursor-pointer border hover:bg-gray-50 text-rose-600"
                   onClick={handleRemove}
