@@ -1,8 +1,6 @@
 "use client";
 
 import { AlertTriangle, Loader } from "lucide-react";
-import { useEffect } from "react";
-import { toast } from "sonner";
 
 import { useCreateOrGetConversation } from "@/features/conversation/api/useCreateOrGetConversation";
 import { useMemberId } from "@/hooks/useMemberId";
@@ -13,19 +11,9 @@ const MemberIdPage = () => {
   const workspaceId = useWorkspaceId();
   const memberId = useMemberId();
 
-  const createOrGetConversation = useCreateOrGetConversation();
-
-  useEffect(() => {
-    createOrGetConversation
-      .mutateAsync({
-        memberId,
-        workspaceId,
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error("Failed to create conversation");
-      });
-  }, [memberId, workspaceId, createOrGetConversation]);
+  const createOrGetConversation = useCreateOrGetConversation({
+    memberId,workspaceId
+  });
 
   if (createOrGetConversation.isPending) {
     return (
