@@ -17,6 +17,7 @@ export const usePanel = () => {
 
   const close = () => {
     setParentMessageId(null);
+    setProfileMemberId(null);
   };
 
   return {
