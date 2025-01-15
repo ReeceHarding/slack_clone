@@ -36,7 +36,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
   const handlePasswordSignIn = form.handleSubmit(({ email, password }) => {
     setSigningIn(true);
-    signIn("password", { email, password, flow: "signIn" })
+    void signIn("password", { email, password, flow: "signIn" })
       .catch(() => {
         setError("Invalid email or password");
       })
@@ -47,7 +47,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
   const handleProviderSignIn = (value: "github" | "google") => () => {
     setSigningIn(true);
-    signIn(value).finally(() => {
+    void signIn(value).finally(() => {
       setSigningIn(false);
     });
   };

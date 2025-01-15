@@ -1,10 +1,22 @@
-# Slack Clone
+# Modern Chat Application
 
-This is a Slack clone, built with [Next.js](https://nextjs.org/), [shadcn/ui](https://ui.shadcn.com/) component library, [convex](https://www.convex.dev/) database and auth, following this [tutorial](https://www.youtube.com/watch?v=lXITA5MZIiI) by [Code with Antonio](https://www.youtube.com/@codewithantonio).
+A real-time chat application built with Next.js, Convex, and modern web technologies.
 
-The application is deployed on Vercel [here](https://slack-clone-green-omega.vercel.app/).
+## Features
+- Real-time messaging
+- Workspace management
+- Channel & direct messaging
+- File sharing
+- User authentication
+- Modern UI with shadcn/ui
 
-## Note
+## Tech Stack
+- Next.js
+- Convex
+- TypeScript
+- shadcn/ui
+- TanStack Query
+- Tailwind CSS
 
-1. For the API hooks, [@tanstack/react-query](https://tanstack.com/query/latest) is used to wrap the `useQuery` and `useMutation` hook from `@convex/react`.
-2. For form, [react-hook-form](https://react-hook-form.com/) is used.
+## Author
+Reece Harding

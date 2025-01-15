@@ -43,7 +43,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
         return;
       }
       setSigningUp(true);
-      signIn("password", { name, email, password, flow: "signUp" })
+      void signIn("password", { name, email, password, flow: "signUp" })
         .catch(() => {
           setError("Something went wrong!");
         })
@@ -54,10 +54,19 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
   );
 
   const handleProviderSignUp = (value: "github" | "google") => () => {
+    console.log("Starting provider sign up with:", value);
     setSigningUp(true);
-    signIn(value).finally(() => {
-      setSigningUp(false);
-    });
+    void signIn(value)
+      .then(() => {
+        console.log("Sign in successful");
+      })
+      .catch((error) => {
+        console.error("Sign in error:", error);
+      })
+      .finally(() => {
+        console.log("Sign in attempt completed");
+        setSigningUp(false);
+      });
   };
 
   return (
@@ -120,7 +129,10 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
         <div className="flex flex-col gap-y-2.5">
           <Button
             disabled={signingUp}
-            onClick={handleProviderSignUp("google")}
+            onClick={() => {
+              console.log("Google button clicked");
+              handleProviderSignUp("google")();
+            }}
             variant="outline"
             size="lg"
             className="w-full relative"

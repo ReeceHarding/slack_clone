@@ -1,8 +1,12 @@
 export default {
   providers: [
     {
-      domain: process.env.CONVEX_SITE_URL,
+      domain: "http://localhost:3000",
       applicationID: "convex",
     },
+    {
+      domain: "https://graceful-wildcat-771.convex.site",
+      applicationID: "convex",
+    }
   ],
 };
