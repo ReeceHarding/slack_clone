@@ -33,7 +33,7 @@ export const UserButton = () => {
             src={user.image}
           />
           <AvatarFallback className="rounded-md bg-sky-500 text-white ">
-            {user.name!.charAt(0).toUpperCase()}
+            {(user.name || "U").charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

@@ -3,6 +3,12 @@ import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
 const schema = defineSchema({
+  users: defineTable({
+    name: v.string(),
+    email: v.string(),
+    image: v.optional(v.string()),
+    tokenIdentifier: v.optional(v.string()),
+  }).index("by_token", ["tokenIdentifier"]),
   ...authTables,
   workspaces: defineTable({
     name: v.string(),
