@@ -10,10 +10,24 @@ import {
 import { useCurrentUser } from "../api/useCurrentUser";
 import { Loader, LogOutIcon } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { useEffect } from "react";
 
 export const UserButton = () => {
   const { signOut } = useAuthActions();
   const { data: user, isLoading } = useCurrentUser();
+  const log = useMutation(api.logging.logToFile);
+
+  useEffect(() => {
+    if (user) {
+      log({
+        source: "UserButton",
+        level: "INFO",
+        message: `USER_DATA_LOADED - ID: ${user._id}, Name: ${user.name}, Email: ${user.email}`
+      });
+    }
+  }, [user, log]);
 
   if (isLoading) {
     return <Loader className="size-4 animate-spin text-muted-foreground" />;
@@ -30,9 +44,8 @@ export const UserButton = () => {
           <AvatarImage
             className="rounded-md"
             alt={user.name}
-            src={user.image}
           />
-          <AvatarFallback className="rounded-md bg-sky-500 text-white ">
+          <AvatarFallback className="rounded-md bg-sky-500 text-white">
             {(user.name || "U").charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>

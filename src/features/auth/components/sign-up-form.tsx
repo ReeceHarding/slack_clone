@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "../../../../convex/_generated/api";
+import { useAuthLogger } from "../../../utils/auth-logger";
 
 interface SignUpFormData {
   name: string;
@@ -17,22 +18,50 @@ export const SignUpForm = () => {
   const { signIn } = useAuthActions();
   const createUser = useMutation(api.user.create);
   const [error, setError] = useState("");
+  const logger = useAuthLogger();
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
-      // First sign in with password auth
+      // Validate password length
+      if (data.password.length < 8) {
+        setError("Password must be at least 8 characters long");
+        return;
+      }
+
+      // First sign up with auth provider
       await signIn("password", {
         email: data.email,
         password: data.password,
+        flow: "signUp",
+        options: {
+          initialUser: {
+            name: data.name
+          }
+        }
       });
 
-      // Then create user profile
+      // Create user record with name and email
       await createUser({
         name: data.name,
         email: data.email,
       });
+
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      console.error("Sign up error:", err);
+      let errorMessage = "Something went wrong";
+      
+      if (err instanceof Error) {
+        if (err.message.includes("Invalid password")) {
+          errorMessage = "Password must be at least 8 characters long";
+        } else if (err.message.includes("already exists")) {
+          errorMessage = "An account with this email already exists";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      setError(errorMessage);
     }
   };
 
@@ -40,7 +69,7 @@ export const SignUpForm = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <input
-          {...register("name")}
+          {...register("name", { required: true })}
           type="text"
           placeholder="Name"
           className="w-full p-2 border rounded"
@@ -48,7 +77,10 @@ export const SignUpForm = () => {
       </div>
       <div>
         <input
-          {...register("email")}
+          {...register("email", { 
+            required: true,
+            pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i 
+          })}
           type="email"
           placeholder="Email"
           className="w-full p-2 border rounded"
@@ -56,7 +88,10 @@ export const SignUpForm = () => {
       </div>
       <div>
         <input
-          {...register("password")}
+          {...register("password", { 
+            required: true,
+            minLength: 8
+          })}
           type="password"
           placeholder="Password"
           className="w-full p-2 border rounded"
