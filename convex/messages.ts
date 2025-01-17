@@ -4,6 +4,7 @@ import { v } from "convex/values";
 
 import { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, QueryCtx } from "./_generated/server";
+import { api } from "./_generated/api";
 
 const populateThread = async (ctx: QueryCtx, messageId: Id<"messages">) => {
   const messages = await ctx.db
@@ -357,6 +358,15 @@ export const create = mutation({
       workspaceId: args.workspaceId,
       parentMessageId: args.parentMessageId,
       conversationId: _conversationId,
+    });
+
+    // Trigger embedding creation
+    await ctx.scheduler.runAfter(0, api.embeddings.insertMessageToPinecone, {
+      messageId,
+      messageBody: args.body,
+      channelId: args.channelId,
+      conversationId: _conversationId,
+      workspaceId: args.workspaceId,
     });
 
     return messageId;
