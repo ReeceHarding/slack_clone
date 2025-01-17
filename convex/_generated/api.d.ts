@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as ai from "../ai.js";
 import type * as auth from "../auth.js";
 import type * as channels from "../channels.js";
 import type * as conversations from "../conversations.js";
@@ -20,6 +21,7 @@ import type * as embeddings from "../embeddings.js";
 import type * as http from "../http.js";
 import type * as members from "../members.js";
 import type * as messages from "../messages.js";
+import type * as notifications from "../notifications.js";
 import type * as reactions from "../reactions.js";
 import type * as setup from "../setup.js";
 import type * as upload from "../upload.js";
@@ -35,6 +37,7 @@ import type * as workspaces from "../workspaces.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  ai: typeof ai;
   auth: typeof auth;
   channels: typeof channels;
   conversations: typeof conversations;
@@ -42,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   members: typeof members;
   messages: typeof messages;
+  notifications: typeof notifications;
   reactions: typeof reactions;
   setup: typeof setup;
   upload: typeof upload;

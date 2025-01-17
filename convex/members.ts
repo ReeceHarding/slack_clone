@@ -2,7 +2,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
 import { Id } from "./_generated/dataModel";
-import { mutation, query, QueryCtx } from "./_generated/server";
+import { mutation, query, QueryCtx, internalQuery } from "./_generated/server";
 
 const populateUser = (ctx: QueryCtx, userId: Id<"users">) => {
   return ctx.db.get(userId);
@@ -271,5 +271,34 @@ export const search = query({
     return members.sort((a, b) => 
       a.user.name.toLowerCase().localeCompare(b.user.name.toLowerCase())
     );
+  },
+});
+
+export const getForAI = internalQuery({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  handler: async (ctx, args) => {
+    const data = await ctx.db
+      .query("members")
+      .withIndex("by_workspace_id", (q) =>
+        q.eq("workspaceId", args.workspaceId)
+      )
+      .collect();
+
+    const members = [];
+
+    for (const member of data) {
+      const user = await populateUser(ctx, member.userId);
+
+      if (user) {
+        members.push({
+          ...member,
+          user,
+        });
+      }
+    }
+
+    return members;
   },
 });

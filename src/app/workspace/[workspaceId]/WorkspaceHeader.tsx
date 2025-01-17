@@ -13,6 +13,7 @@ import {
 import { Doc } from "../../../../convex/_generated/dataModel";
 import { InviteModal } from "./InviteModal";
 import { PreferenceModal } from "./PreferenceModal";
+import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 
 interface WorkspaceHeaderProps {
   workspace: Doc<"workspaces">;
@@ -84,19 +85,16 @@ export const WorkspaceHeader = ({
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5">
+          <NotificationsPopover />
           <InDevelopmentHint side="bottom">
-            {/* <Hint label="Filter conversation" side="bottom"> */}
             <Button variant="transparent" size="iconSm" disabled>
               <ListFilter className="size-4" />
             </Button>
-            {/* </Hint> */}
           </InDevelopmentHint>
           <InDevelopmentHint side="bottom">
-            {/* <Hint label="New message" side="bottom"> */}
             <Button variant="transparent" size="iconSm" disabled>
               <SquarePen className="size-4" />
             </Button>
-            {/* </Hint> */}
           </InDevelopmentHint>
         </div>
       </div>

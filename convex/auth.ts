@@ -10,6 +10,7 @@ const CustomPassword = Password<DataModel>({
       image: "",
       tokenIdentifier: `password:${params.email}`,
       orgIds: [],
+      aiEnabled: false,
     };
   },
 });

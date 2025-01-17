@@ -83,18 +83,14 @@ const detectMentions = async (
     console.log("Original body:", body);
     const quillContent = JSON.parse(body);
     
-    // Extract mentions from Quill ops
+    // Extract mentions from Quill ops that have mention attributes
     const mentions: string[] = [];
     if (quillContent.ops) {
-      const text = quillContent.ops.map((op: any) => op.insert).join('');
-      console.log("Full text:", text);
-      
-      // Use regex to find @mentions followed by word characters and spaces until a special character or double space
-      const mentionMatches = text.match(/@(\w+(?:\s+\w+)*?)(?=\s{2}|\n|[.,!?]|$)/g) || [];
-      console.log("Mention matches:", mentionMatches);
-      
-      // Clean up the mentions (remove @ and trim)
-      mentions.push(...mentionMatches.map((match: string) => match.slice(1).trim()));
+      quillContent.ops.forEach((op: any) => {
+        if (op.attributes?.mention) {
+          mentions.push(op.attributes.mention.trim());
+        }
+      });
     }
     
     console.log("Cleaned mentions:", mentions);
@@ -126,6 +122,22 @@ const detectMentions = async (
   } catch (e) {
     console.log("Error parsing message:", e);
     return [];
+  }
+};
+
+// Function to check if text contains a question
+const containsQuestion = (text: string): boolean => {
+  // Parse the Quill content
+  try {
+    const quillContent = JSON.parse(text);
+    const fullText = quillContent.ops.map((op: any) => op.insert).join('');
+    
+    // Check for question marks or question words
+    return fullText.includes('?') || 
+           /\b(what|who|when|where|why|how|can|could|would|will|should)\b/i.test(fullText);
+  } catch (e) {
+    console.log("Error parsing message for question detection:", e);
+    return false;
   }
 };
 
@@ -371,6 +383,18 @@ export const getById = query({
   },
 });
 
+// Internal version of getById that doesn't require auth - for system operations
+export const getByIdInternal = query({
+  args: {
+    id: v.id("messages"),
+  },
+  handler: async (ctx, args) => {
+    const message = await ctx.db.get(args.id);
+    if (!message) return null;
+    return message;
+  },
+});
+
 export const create = mutation({
   args: {
     body: v.string(),
@@ -379,8 +403,40 @@ export const create = mutation({
     workspaceId: v.id("workspaces"),
     parentMessageId: v.optional(v.id("messages")),
     image: v.optional(v.id("_storage")),
+    isSystemMessage: v.optional(v.boolean()),
+    memberId: v.optional(v.id("members")),
   },
   handler: async (ctx, args) => {
+    // If it's a system message (like AI response), skip auth check and use provided memberId
+    if (args.isSystemMessage && args.memberId) {
+      // Debug logging
+      console.log("Creating system message with body:", args.body);
+      
+      // Parse the message body to get plain text for better logging
+      let plainTextBody = args.body;
+      try {
+        const content = JSON.parse(args.body);
+        plainTextBody = content.ops?.map((op: any) => op.insert).join('') || args.body;
+        console.log("Parsed plain text body:", plainTextBody);
+      } catch (e) {
+        console.log("Failed to parse message body as JSON, using as is");
+      }
+
+      // Create the message with the provided memberId
+      const messageId = await ctx.db.insert("messages", {
+        body: args.body,
+        channelId: args.channelId,
+        conversationId: args.conversationId,
+        memberId: args.memberId,
+        workspaceId: args.workspaceId,
+        parentMessageId: args.parentMessageId,
+        image: args.image,
+      });
+
+      return messageId;
+    }
+
+    // Regular user message flow
     const userId = await getAuthUserId(ctx);
 
     if (!userId) {
@@ -396,11 +452,28 @@ export const create = mutation({
     // Debug logging
     console.log("Creating message with body:", args.body);
     
+    // Parse the message body to get plain text for better logging
+    let plainTextBody = args.body;
+    try {
+      const content = JSON.parse(args.body);
+      plainTextBody = content.ops?.map((op: any) => op.insert).join('') || args.body;
+      console.log("Parsed plain text body:", plainTextBody);
+    } catch (e) {
+      console.log("Failed to parse message body as JSON, using as is");
+    }
+    
     // Detect mentions in the message body
+    console.log("Starting mention detection...");
     const mentionUserIds = await detectMentions(ctx, args.body, args.workspaceId);
     
     // Debug logging
     console.log("Detected mention user IDs:", mentionUserIds);
+
+    // Get user details for better logging
+    const allFoundUsers = await Promise.all(
+      mentionUserIds.map(id => ctx.db.get(id))
+    );
+    console.log("All found users:", allFoundUsers);
 
     // Create the message with mentions
     const messageId = await ctx.db.insert("messages", {
@@ -414,9 +487,53 @@ export const create = mutation({
       mentionUserIds: mentionUserIds.length > 0 ? mentionUserIds : undefined,
     });
 
+    // Create notifications for mentioned users
+    if (mentionUserIds.length > 0) {
+      console.log("Creating notifications for mentioned users");
+      
+      // Skip notification if user mentions themselves
+      const mentionedUsersExceptSelf = mentionUserIds.filter(mentionedUserId => mentionedUserId !== userId);
+      console.log("Mentioned users except self:", mentionedUsersExceptSelf);
+      
+      for (const mentionedUserId of mentionedUsersExceptSelf) {
+        // Get user details for logging
+        const mentionedUser = await ctx.db.get(mentionedUserId);
+        console.log("Processing notification for user:", mentionedUser);
+
+        // Create notification
+        const notificationId = await ctx.db.insert("notifications", {
+          userId: mentionedUserId,
+          messageId,
+          workspaceId: args.workspaceId,
+          channelId: args.channelId,
+          conversationId: args.conversationId,
+          isRead: false,
+          createdAt: Date.now(),
+        });
+        console.log("Created notification with ID:", notificationId);
+
+        // Check if message contains a question before generating AI response
+        const hasQuestion = containsQuestion(args.body);
+        console.log("Message question check:", { hasQuestion, plainTextBody });
+        
+        if (hasQuestion) {
+          console.log("Message contains question, generating AI response for user:", mentionedUser?.name);
+          // Generate AI response if enabled
+          await ctx.scheduler.runAfter(0, api.ai.generateAIResponse, {
+            messageId,
+            mentionedUserId,
+            workspaceId: args.workspaceId,
+            originalMessage: args.body,
+          });
+        } else {
+          console.log("Message does not contain a question, skipping AI response for user:", mentionedUser?.name);
+        }
+      }
+    }
+
     // Debug logging
     console.log("Created message with ID:", messageId);
 
     return messageId;
-  },
+  }
 });

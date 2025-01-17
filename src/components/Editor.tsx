@@ -3,6 +3,7 @@ import "quill/dist/quill.snow.css";
 import { ImageIcon, Smile, XIcon } from "lucide-react";
 import Quill, { QuillOptions } from "quill";
 import { Delta, Op } from "quill/core";
+import { Blot } from "parchment";
 import {
   MutableRefObject,
   useEffect,
@@ -93,9 +94,47 @@ const Editor = ({
       container.ownerDocument.createElement("div")
     );
 
+    // Register the mention format
+    const Inline = Quill.import('blots/inline') as any;
+    
+    class MentionBlot extends Inline {
+      static blotName = 'mention';
+      static tagName = 'span';
+      
+      static create(data: string) {
+        const node = super.create();
+        node.setAttribute('class', 'ql-mention');
+        node.setAttribute('data-mention', data);
+        node.textContent = '@' + data;
+        return node;
+      }
+      
+      static formats(node: HTMLElement) {
+        return node.getAttribute('data-mention');
+      }
+    }
+    
+    Quill.register('formats/mention', MentionBlot);
+
+    // Add custom styles for mentions
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .ql-mention {
+        background-color: rgba(29, 155, 209, 0.1);
+        color: rgb(29, 155, 209);
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-weight: 500;
+        cursor: default;
+        user-select: all;
+      }
+    `;
+    document.head.appendChild(style);
+
     const options: QuillOptions = {
       theme: "snow",
       placeholder: placeholderRef.current,
+      formats: ['bold', 'italic', 'strike', 'link', 'list', 'mention'],
       modules: {
         toolbar: [
           ["bold", "italic", "strike"],
@@ -248,25 +287,26 @@ const Editor = ({
     }
 
     const quill = quillRef.current;
-    const currentPosition = quill.getSelection()?.index;
-    if (currentPosition === undefined) return;
+    const currentPosition = quill.getSelection()?.index || 0;
     
-    // Delete the partial @mention
-    const length = currentPosition - mentionState.index;
-    quill.deleteText(mentionState.index, length);
+    // Delete the typed @ and query
+    quill.deleteText(mentionState.index, currentPosition - mentionState.index);
     
-    // Insert the complete @mention
-    quill.insertText(mentionState.index, `@${username} `);
+    // Insert the mention as a format
+    quill.insertText(mentionState.index, username, { mention: username });
     
+    // Add a space after the mention
+    quill.insertText(mentionState.index + username.length, ' ');
+    
+    // Move cursor after the mention and space
+    quill.setSelection(mentionState.index + username.length + 1, 0);
+
     // Reset mention state
     setMentionState({
       isActive: false,
       query: "",
       index: null
     });
-    
-    // Move cursor after the inserted mention
-    quill.setSelection(mentionState.index + username.length + 2);
   };
 
   return (

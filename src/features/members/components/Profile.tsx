@@ -4,6 +4,7 @@ import {
   Loader,
   MailIcon,
   XIcon,
+  Bot,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -18,6 +19,10 @@ import { useCurrentMember } from "../api/useCurrentMember";
 import { useGetMember } from "../api/useGetMember";
 import { useRemoveMember } from "../api/useRemoveMember";
 import { useUpdateMember } from "../api/useUpdateMember";
+import { useCurrentUser } from "@/features/auth/api/useCurrentUser";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +42,8 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
   const getMember = useGetMember({ id: memberId });
   const updateMember = useUpdateMember();
   const removeMember = useRemoveMember();
+  const { data: currentUser } = useCurrentUser();
+  const toggleAI = useMutation(api.user.toggleAI);
 
   const [ConfirmLeaveDialog, confirmLeave] = useConfirm(
     "Leave workspace",
@@ -103,6 +110,16 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
       });
   };
 
+  const handleAIToggle = async () => {
+    try {
+      await toggleAI({});
+      toast.success("AI response setting updated");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update AI response setting");
+    }
+  };
+
   if (getMember.isLoading || currentMember.isLoading) {
     return (
       <div className="h-full flex flex-col">
@@ -135,6 +152,8 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
       </div>
     );
   }
+
+  const isCurrentUser = currentUser?._id === getMember.data.user._id;
 
   return (
     <>
@@ -225,6 +244,31 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
             </div>
           </div>
         </div>
+        {isCurrentUser && (
+          <>
+            <Separator />
+            <div className="flex flex-col p-4">
+              <p className="text-sm font-bold mb-4">AI Settings</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="size-9 rounded-md bg-muted flex items-center justify-center">
+                    <Bot className="size-4" />
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-[13px] font-semibold">AI Auto-Response</p>
+                    <p className="text-xs text-muted-foreground">
+                      When enabled, AI will respond to mentions on your behalf
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={getMember.data.user.aiEnabled ?? false}
+                  onCheckedChange={handleAIToggle}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

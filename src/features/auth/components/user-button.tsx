@@ -5,24 +5,31 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCurrentUser } from "../api/useCurrentUser";
-import { Loader, LogOutIcon } from "lucide-react";
+import { Loader, LogOutIcon, UserIcon } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useWorkspaceId } from "@/hooks/useWorkspaceId";
+import { useCurrentMember } from "@/features/members/api/useCurrentMember";
+import { usePanel } from "@/hooks/usePanel";
 
 export const UserButton = () => {
   const router = useRouter();
   const { signOut } = useAuthActions();
   const { data: user, isLoading } = useCurrentUser();
+  const workspaceId = useWorkspaceId();
+  const currentMember = useCurrentMember({ workspaceId });
+  const { openProfile } = usePanel();
 
-  if (isLoading) {
+  if (isLoading || currentMember.isLoading) {
     return <Loader className="size-4 animate-spin text-white" />;
   }
 
-  if (!user) {
+  if (!user || !currentMember.data) {
     return (
       <Button 
         variant="ghost" 
@@ -33,6 +40,12 @@ export const UserButton = () => {
       </Button>
     );
   }
+
+  const handleProfileClick = () => {
+    if (currentMember.data) {
+      openProfile(currentMember.data._id);
+    }
+  };
 
   return (
     <DropdownMenu modal={false}>
@@ -49,6 +62,14 @@ export const UserButton = () => {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center" side="right" className="w-60">
+        <DropdownMenuItem 
+          onClick={handleProfileClick} 
+          className="h-10 cursor-pointer"
+        >
+          <UserIcon className="size-4 mr-2" />
+          Profile
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()} className="h-10 cursor-pointer">
           <LogOutIcon className="size-4 mr-2" />
           Log out

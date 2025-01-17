@@ -11,6 +11,7 @@ export const createTestUser = mutation({
       image: "",
       tokenIdentifier: `github:${"test@example.com"}`,
       orgIds: [],
+      aiEnabled: false,
     });
 
     // Create test workspace

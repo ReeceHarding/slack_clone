@@ -11,6 +11,7 @@ import { Id } from "../../convex/_generated/dataModel";
 import { ChannelHero } from "./ChannelHero";
 import { ConversationHero } from "./ConversationHero";
 import { Message } from "./Message";
+import { useMessageScroll } from "@/features/messages/hooks/useMessageScroll";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -49,6 +50,7 @@ export const MessageList = ({
 }: MessageListProps) => {
   const [editingId, setEditingId] = useState<Id<"messages"> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  useMessageScroll();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

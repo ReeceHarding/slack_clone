@@ -65,7 +65,21 @@ const schema = defineSchema({
     image: v.string(),
     tokenIdentifier: v.string(),
     orgIds: v.array(v.string()),
+    aiEnabled: v.optional(v.boolean()),
   }).index("by_token", ["tokenIdentifier"]),
+  notifications: defineTable({
+    userId: v.id("users"),
+    messageId: v.id("messages"),
+    workspaceId: v.id("workspaces"),
+    channelId: v.optional(v.id("channels")),
+    conversationId: v.optional(v.id("conversations")),
+    isRead: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_workspace_id", ["workspaceId"])
+    .index("by_message_id", ["messageId"])
+    .index("by_user_id_created_at", ["userId", "createdAt"]),
 });
 
 export default schema;
