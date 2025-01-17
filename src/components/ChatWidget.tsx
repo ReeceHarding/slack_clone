@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageSquareText, Send, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -14,6 +14,23 @@ export const ChatWidget = () => {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    // Only auto-scroll if we're near the bottom already or if it's a new message
+    const container = messagesEndRef.current?.parentElement;
+    if (container) {
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      if (isNearBottom || messages.length <= 1) {
+        scrollToBottom();
+      }
+    }
+  }, [messages]);
 
   // Handle escape key to close chat
   useEffect(() => {
@@ -134,6 +151,7 @@ export const ChatWidget = () => {
                   <div className="text-sm whitespace-pre-wrap">{msg.content}</div>
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}

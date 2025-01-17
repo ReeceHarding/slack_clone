@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import isYesterday from "dayjs/plugin/isYesterday";
 import { Loader } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { useCurrentMember } from "@/features/members/api/useCurrentMember";
 import { useWorkspaceId } from "@/hooks/useWorkspaceId";
@@ -48,6 +48,21 @@ export const MessageList = ({
   loadMore,
 }: MessageListProps) => {
   const [editingId, setEditingId] = useState<Id<"messages"> | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const container = messagesEndRef.current?.parentElement;
+    if (container) {
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      if (isNearBottom || data?.length === 1) {
+        scrollToBottom();
+      }
+    }
+  }, [data]);
 
   const workspaceId = useWorkspaceId();
 
@@ -69,6 +84,7 @@ export const MessageList = ({
   );
   return (
     <div className="flex-1 flex flex-col-reverse pb-4 overflow-y-auto messages-scrollbar">
+      <div ref={messagesEndRef} />
       {Object.entries(groupedMessages || {}).map(([dateKey, messages]) => (
         <div key={dateKey}>
           <div className="text-center my-2 relative">

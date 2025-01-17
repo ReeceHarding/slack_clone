@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { AlertTriangle, Loader, XIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import Quill from "quill";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { Message } from "@/components/Message";
@@ -58,6 +58,22 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
   const [editingId, setEditingId] = useState<Id<"messages"> | null>(null);
   const [editorKey, setEditorKey] = useState(0);
   const [isPending, setIsPending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    // Only auto-scroll if we're near the bottom already or if it's a new message
+    const container = messagesEndRef.current?.parentElement;
+    if (container) {
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      if (isNearBottom || getMessages.results.length === 1) {
+        scrollToBottom();
+      }
+    }
+  }, [getMessages.results]);
 
   const groupedMessages = getMessages.results.reduce(
     (groups, message) => {
@@ -160,6 +176,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
         </Button>
       </div>
       <div className="flex-1 flex flex-col-reverse pb-4 overflow-y-auto messages-scrollbar">
+        <div ref={messagesEndRef} />
         {Object.entries(groupedMessages || {}).map(([dateKey, messages]) => (
           <div key={dateKey}>
             <div className="text-center my-2 relative">
