@@ -15,6 +15,7 @@ export const insertMessageToPinecone = action({
     memberId: v.id("members"),
     username: v.string(),
     creationTime: v.number(),
+    formattedCreationTime: v.string(),
   },
   handler: async (ctx, args) => {
     try {
@@ -99,6 +100,7 @@ export const insertMessageToPinecone = action({
           memberId: args.memberId.toString(),
           username: args.username,
           creationTime: args.creationTime,
+          formattedCreationTime: args.formattedCreationTime,
         };
 
         // Upsert the vector to Pinecone

@@ -75,7 +75,11 @@ export async function POST(req: Request) {
 
     // 3. Build context from search results
     const context = searchResult.matches
-      .map(match => match.metadata?.text || '')
+      .map(match => {
+        const metadata = match.metadata as Record<string, any> | undefined;
+        if (!metadata?.text || !metadata.username || !metadata.formattedCreationTime) return '';
+        return `@${metadata.username} said "${String(metadata.text).trim()}" on ${metadata.formattedCreationTime}`;
+      })
       .join('\n');
     console.log('7. Context built from matches');
 

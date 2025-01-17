@@ -363,6 +363,17 @@ export const create = mutation({
     // Get the user info
     const user = await ctx.db.get(member.userId);
     const username = user?.name || "Unknown User";
+    
+    const timestamp = Date.now();
+    const formattedDate = new Date(timestamp).toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
 
     // Trigger embedding creation
     await ctx.scheduler.runAfter(0, api.embeddings.insertMessageToPinecone, {
@@ -373,7 +384,8 @@ export const create = mutation({
       workspaceId: args.workspaceId,
       memberId: member._id,
       username: username,
-      creationTime: Date.now(),
+      creationTime: timestamp,
+      formattedCreationTime: formattedDate,
     });
 
     return messageId;
