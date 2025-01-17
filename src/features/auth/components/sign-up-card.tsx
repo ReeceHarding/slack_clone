@@ -1,3 +1,5 @@
+"use client";
+
 import { useAuthActions } from "@convex-dev/auth/react";
 import { TriangleAlert } from "lucide-react";
 import { useState } from "react";
@@ -43,7 +45,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
         return;
       }
       setSigningUp(true);
-      void signIn("password", { name, email, password, flow: "signUp" })
+      signIn("password", { name, email, password, flow: "signUp" })
         .catch(() => {
           setError("Something went wrong!");
         })
@@ -54,19 +56,10 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
   );
 
   const handleProviderSignUp = (value: "github" | "google") => () => {
-    console.log("Starting provider sign up with:", value);
     setSigningUp(true);
-    void signIn(value)
-      .then(() => {
-        console.log("Sign in successful");
-      })
-      .catch((error) => {
-        console.error("Sign in error:", error);
-      })
-      .finally(() => {
-        console.log("Sign in attempt completed");
-        setSigningUp(false);
-      });
+    signIn(value).finally(() => {
+      setSigningUp(false);
+    });
   };
 
   return (
@@ -129,10 +122,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
         <div className="flex flex-col gap-y-2.5">
           <Button
             disabled={signingUp}
-            onClick={() => {
-              console.log("Google button clicked");
-              handleProviderSignUp("google")();
-            }}
+            onClick={handleProviderSignUp("google")}
             variant="outline"
             size="lg"
             className="w-full relative"

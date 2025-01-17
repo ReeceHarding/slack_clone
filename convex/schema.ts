@@ -3,7 +3,10 @@ import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
 const schema = defineSchema({
+  // We spread all authentication tables in so the 'users' table is automatically created
+  // That table can contain 'name', 'email', and more once we define them in createUser in auth.ts
   ...authTables,
+
   workspaces: defineTable({
     name: v.string(),
     userId: v.id("users"),
@@ -55,6 +58,13 @@ const schema = defineSchema({
     .index("by_workspace_id", ["workspaceId"])
     .index("by_message_id", ["messageId"])
     .index("by_member_id", ["memberId"]),
+  users: defineTable({
+    name: v.string(),
+    email: v.string(),
+    image: v.string(),
+    tokenIdentifier: v.string(),
+    orgIds: v.array(v.string()),
+  }).index("by_token", ["tokenIdentifier"]),
 });
 
 export default schema;

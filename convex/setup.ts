@@ -9,6 +9,8 @@ export const createTestUser = mutation({
       name: "Test User",
       email: "test@example.com",
       image: "",
+      tokenIdentifier: `github:${"test@example.com"}`,
+      orgIds: [],
     });
 
     // Create test workspace

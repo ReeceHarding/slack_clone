@@ -1,3 +1,5 @@
+"use client";
+
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useForm } from "react-hook-form";
 import { FaGithub } from "react-icons/fa";
@@ -36,7 +38,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
   const handlePasswordSignIn = form.handleSubmit(({ email, password }) => {
     setSigningIn(true);
-    void signIn("password", { email, password, flow: "signIn" })
+    signIn("password", { email, password, flow: "signIn" })
       .catch(() => {
         setError("Invalid email or password");
       })
@@ -47,7 +49,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
   const handleProviderSignIn = (value: "github" | "google") => () => {
     setSigningIn(true);
-    void signIn(value).finally(() => {
+    signIn(value).finally(() => {
       setSigningIn(false);
     });
   };

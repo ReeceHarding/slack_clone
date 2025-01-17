@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { useConvexAuth } from "convex/react";
+import { useEffect } from "react";
 
 interface CreateWorkspaceModalState {
   open: boolean;
