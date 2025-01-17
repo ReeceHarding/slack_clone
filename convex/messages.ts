@@ -73,6 +73,62 @@ const getMember = async (
     .unique();
 };
 
+// Utility function to detect mentions in message text
+const detectMentions = async (
+  ctx: QueryCtx,
+  body: string,
+  workspaceId: Id<"workspaces">
+): Promise<Id<"users">[]> => {
+  try {
+    console.log("Original body:", body);
+    const quillContent = JSON.parse(body);
+    
+    // Extract mentions from Quill ops
+    const mentions: string[] = [];
+    if (quillContent.ops) {
+      const text = quillContent.ops.map((op: any) => op.insert).join('');
+      console.log("Full text:", text);
+      
+      // Use regex to find @mentions followed by word characters and spaces until a special character or double space
+      const mentionMatches = text.match(/@(\w+(?:\s+\w+)*?)(?=\s{2}|\n|[.,!?]|$)/g) || [];
+      console.log("Mention matches:", mentionMatches);
+      
+      // Clean up the mentions (remove @ and trim)
+      mentions.push(...mentionMatches.map((match: string) => match.slice(1).trim()));
+    }
+    
+    console.log("Cleaned mentions:", mentions);
+    
+    if (mentions.length === 0) return [];
+
+    // Find all users with matching names
+    const users = await Promise.all(
+      mentions.map(async (username) => {
+        console.log("Searching for user with name:", username);
+        const user = await ctx.db
+          .query("users")
+          .filter((q) => q.eq(q.field("name"), username))
+          .first();
+        console.log("Found user:", user);
+        return user;
+      })
+    );
+
+    console.log("All found users:", users);
+
+    // Filter out any undefined values and return unique user IDs
+    const mentionUserIds = Array.from(new Set(users
+      .filter((user): user is Doc<"users"> => user !== null && user !== undefined)
+      .map(user => user._id)));
+    console.log("Final mentionUserIds:", mentionUserIds);
+
+    return mentionUserIds;
+  } catch (e) {
+    console.log("Error parsing message:", e);
+    return [];
+  }
+};
+
 export const update = mutation({
   args: {
     id: v.id("messages"),
@@ -318,11 +374,11 @@ export const getById = query({
 export const create = mutation({
   args: {
     body: v.string(),
-    image: v.optional(v.id("_storage")),
-    workspaceId: v.id("workspaces"),
     channelId: v.optional(v.id("channels")),
     conversationId: v.optional(v.id("conversations")),
+    workspaceId: v.id("workspaces"),
     parentMessageId: v.optional(v.id("messages")),
+    image: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -337,56 +393,29 @@ export const create = mutation({
       throw new Error("Unauthorized");
     }
 
-    let _conversationId = args.conversationId;
+    // Debug logging
+    console.log("Creating message with body:", args.body);
+    
+    // Detect mentions in the message body
+    const mentionUserIds = await detectMentions(ctx, args.body, args.workspaceId);
+    
+    // Debug logging
+    console.log("Detected mention user IDs:", mentionUserIds);
 
-    // Only possible if we are replying in a thread in 1:1 conversation
-    if (!args.conversationId && !args.channelId && args.parentMessageId) {
-      const parentMessage = await ctx.db.get(args.parentMessageId);
-
-      if (!parentMessage) {
-        throw new Error("Parent message not found");
-      }
-
-      _conversationId = parentMessage.conversationId;
-    }
-
+    // Create the message with mentions
     const messageId = await ctx.db.insert("messages", {
-      memberId: member._id,
       body: args.body,
-      image: args.image,
       channelId: args.channelId,
+      conversationId: args.conversationId,
+      memberId: member._id,
       workspaceId: args.workspaceId,
       parentMessageId: args.parentMessageId,
-      conversationId: _conversationId,
+      image: args.image,
+      mentionUserIds: mentionUserIds.length > 0 ? mentionUserIds : undefined,
     });
 
-    // Get the user info
-    const user = await ctx.db.get(member.userId);
-    const username = user?.name || "Unknown User";
-    
-    const timestamp = Date.now();
-    const formattedDate = new Date(timestamp).toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-
-    // Trigger embedding creation
-    await ctx.scheduler.runAfter(0, api.embeddings.insertMessageToPinecone, {
-      messageId,
-      messageBody: args.body,
-      channelId: args.channelId,
-      conversationId: _conversationId,
-      workspaceId: args.workspaceId,
-      memberId: member._id,
-      username: username,
-      creationTime: timestamp,
-      formattedCreationTime: formattedDate,
-    });
+    // Debug logging
+    console.log("Created message with ID:", messageId);
 
     return messageId;
   },

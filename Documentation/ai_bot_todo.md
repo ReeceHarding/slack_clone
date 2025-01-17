@@ -4,7 +4,7 @@ Below is a step-by-step, **very detailed** plan for implementing **@ mentions**,
 ## **High-Level Overview of the Steps**
 
 [x] 1. **Add a Mentions/Autocomplete UI** for typing `@username` in the chat input.
-[ ] 2. **Implement Mentions Detection** in messages:
+[x] 2. **Implement Mentions Detection** in messages:
    - Parse the message text for `@username`.
    - Attach mention metadata to the message (e.g., which users are mentioned).
 [ ] 3. **Create a Notification System** so that:
@@ -59,18 +59,18 @@ We'll do multiple **checkpoints** to ensure everything is working:
 
 ### 2. **Detect and Store Mentions in the Message**
 
-[ ] 1. **When the user sends the message** (the step in `Editor.tsx` or in your create message mutation in `messages.ts`):
+[x] 1. **When the user sends the message** (the step in `Editor.tsx` or in your create message mutation in `messages.ts`):
    - Parse the final text body to find mentions of the form `@username`.
    - Example approach:
      - Use a regex like `/@([\w]+)/g` to detect mention tokens (assuming only alphanumeric in names).
      - For each mention found, see if there's a corresponding user in the `users` table with `name: thatString`.
      - Gather a list of `mentionedUserIds: Id<"users">[]`.
 
-[ ] 2. **Update the `messages` table schema** (optional approach #1):
+[x] 2. **Update the `messages` table schema** (optional approach #1):
    - You could add a new field in `messages` called `mentionUserIds: v.array(v.id("users"))` to store the IDs of all mentioned users in that message.
    - Alternatively, you could store mention data in a separate `mentions` table. But easiest is to store an array on `messages`.
 
-[ ] 3. **Add logic to your `createMessage` mutation** in `messages.ts`:
+[x] 3. **Add logic to your `createMessage` mutation** in `messages.ts`:
    - After constructing the `body` field, run the mention detection.
    - Then store `mentionUserIds` on the message record, e.g.:
      ```ts
@@ -82,7 +82,7 @@ We'll do multiple **checkpoints** to ensure everything is working:
      ```
    - If no mentions are found, store an empty array.
 
-[ ] 4. **Checkpoint B**: Verify that mentions are being detected in the final message text, and that your `messages` table has a `mentionUserIds` array that's correct.
+[x] 4. **Checkpoint B**: Verify that mentions are being detected in the final message text, and that your `messages` table has a `mentionUserIds` array that's correct.
 
 ---
 

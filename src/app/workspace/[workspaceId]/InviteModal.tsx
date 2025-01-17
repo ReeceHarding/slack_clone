@@ -36,7 +36,7 @@ export const InviteModal = ({
   const { mutateAsync, isPending } = useNewJoinCode();
 
   const handleCopy = () => {
-    const inviteLink = `${window.location.origin}/join/${workspace.joinCode}`;
+    const inviteLink = `${window.location.origin}/join/${joinCode}`;
 
     navigator.clipboard
       .writeText(inviteLink)

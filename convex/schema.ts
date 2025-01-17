@@ -38,6 +38,7 @@ const schema = defineSchema({
     parentMessageId: v.optional(v.id("messages")),
     conversationId: v.optional(v.id("conversations")),
     updatedAt: v.optional(v.number()),
+    mentionUserIds: v.optional(v.array(v.id("users"))),
   })
     .index("by_workspace_id", ["workspaceId"])
     .index("by_member_id", ["memberId"])

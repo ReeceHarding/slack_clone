@@ -38,7 +38,7 @@ export const MentionsPopover = ({
           break;
         case "Enter":
           e.preventDefault();
-          onSelect(members[selectedIndex].user.name);
+          onSelect(`${members[selectedIndex].user.name} `);
           break;
         case "Escape":
           e.preventDefault();
@@ -76,7 +76,7 @@ export const MentionsPopover = ({
                   "w-full text-left px-3 py-2 flex items-center gap-2 hover:bg-gray-100/80 transition-colors",
                   selectedIndex === index && "bg-gray-100"
                 )}
-                onClick={() => onSelect(member.user.name)}
+                onClick={() => onSelect(`${member.user.name} `)}
                 onMouseEnter={() => setSelectedIndex(index)}
               >
                 <Avatar className="size-6 shrink-0">
