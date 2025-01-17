@@ -220,3 +220,56 @@ export const remove = mutation({
     return args.id;
   },
 });
+
+export const search = query({
+  args: {
+    workspaceId: v.id("workspaces"),
+    query: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      return [];
+    }
+
+    const member = await ctx.db
+      .query("members")
+      .withIndex("by_workspace_id_user_id", (q) =>
+        q.eq("workspaceId", args.workspaceId).eq("userId", userId)
+      )
+      .unique();
+
+    if (!member) {
+      return [];
+    }
+
+    const data = await ctx.db
+      .query("members")
+      .withIndex("by_workspace_id", (q) =>
+        q.eq("workspaceId", args.workspaceId)
+      )
+      .collect();
+
+    const members = [];
+    const searchQuery = args.query.toLowerCase().trim();
+
+    for (const member of data) {
+      const user = await populateUser(ctx, member.userId);
+
+      if (user && (
+        searchQuery === "" || 
+        user.name.toLowerCase().includes(searchQuery)
+      )) {
+        members.push({
+          ...member,
+          user,
+        });
+      }
+    }
+
+    return members.sort((a, b) => 
+      a.user.name.toLowerCase().localeCompare(b.user.name.toLowerCase())
+    );
+  },
+});

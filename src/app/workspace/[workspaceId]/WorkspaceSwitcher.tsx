@@ -9,6 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useGetWorkspace } from "@/features/workspaces/api/useGetWorkspace";
 import { useGetWorkspaces } from "@/features/workspaces/api/useGetWorkspaces";
@@ -61,6 +62,16 @@ export const WorkspaceSwitcher = () => {
             <p className="truncate">{workspace.name}</p>
           </DropdownMenuItem>
         ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => router.push('/join')}
+        >
+          <div className="size-9 relative overflow-hidden bg-[#F2F2F2] text-slate-800 font-semibold text-lg rounded-md flex items-center justify-center mr-2">
+            <PlusIcon className="rotate-45" />
+          </div>
+          Join workspace
+        </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => setOpen(true)}

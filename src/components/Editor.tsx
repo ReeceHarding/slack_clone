@@ -19,11 +19,23 @@ import Image from "next/image";
 import { EmojiPopover } from "./EmojiPopover";
 import { Hint } from "./Hint";
 import { Button } from "./ui/button";
+import { MentionsPopover } from "./MentionsPopover";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "./ui/dropdown-menu";
 
 type EditorValue = {
   image: File | null;
   body: string;
 };
+
+interface MentionState {
+  isActive: boolean;
+  query: string;
+  index: number | null;
+}
 
 interface EditorProps {
   variant?: "create" | "update";
@@ -46,10 +58,11 @@ const Editor = ({
 }: EditorProps) => {
   const [image, setImage] = useState<File | null>(null);
   const [text, setText] = useState("");
-  const isEmpty = useMemo(
-    () => !image && text.replace("/s*/g", "").trim().length === 0,
-    [text, image]
-  );
+  const [mentionState, setMentionState] = useState<MentionState>({
+    isActive: false,
+    query: "",
+    index: null,
+  });
   const [isToolbarVisible, setIsToolbarVisible] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -59,6 +72,11 @@ const Editor = ({
   const defaultValueRef = useRef(defaultValue);
   const disabledRef = useRef(disabled);
   const imageElementRef = useRef<HTMLInputElement>(null);
+
+  const isEmpty = useMemo(
+    () => !image && text.replace("/s*/g", "").trim().length === 0,
+    [text, image]
+  );
 
   useLayoutEffect(() => {
     onSubmitRef.current = onSubmit;
@@ -96,16 +114,19 @@ const Editor = ({
             enter: {
               key: "Enter",
               handler: () => {
+                if (mentionState.isActive) return true;
+
                 const text = quill.getText();
                 const addedImage = imageElementRef.current?.files?.[0] || null;
                 const isEmpty =
                   !addedImage && text.replace("/s*/g", "").trim().length === 0;
 
-                if (isEmpty) return;
+                if (isEmpty) return true;
 
                 const body = JSON.stringify(quill.getContents());
 
                 onSubmitRef.current?.({ body, image: addedImage });
+                return false;
               },
             },
             shift_enter: {
@@ -113,6 +134,7 @@ const Editor = ({
               shiftKey: true,
               handler: () => {
                 quill.insertText(quill.getSelection()?.index || 0, "\n");
+                return false;
               },
             },
           },
@@ -132,7 +154,56 @@ const Editor = ({
     setText(quill.getText());
 
     quill.on(Quill.events.TEXT_CHANGE, () => {
-      setText(quill.getText());
+      const text = quill.getText();
+      setText(text);
+      
+      const selection = quill.getSelection();
+      if (!selection) return;
+      
+      const cursorPosition = selection.index;
+      const textBeforeCursor = text.slice(0, cursorPosition);
+      
+      // Check if we just typed @
+      if (textBeforeCursor.endsWith("@")) {
+        setMentionState({
+          isActive: true,
+          query: "",
+          index: cursorPosition - 1
+        });
+        return;
+      }
+      
+      // If mention is active, update the query
+      if (mentionState.isActive && mentionState.index !== null) {
+        // Get text from @ symbol to cursor
+        const currentQuery = text.slice(mentionState.index + 1, cursorPosition);
+        
+        // If we've deleted the @ symbol, deactivate mentions
+        if (text[mentionState.index] !== "@") {
+          setMentionState({
+            isActive: false,
+            query: "",
+            index: null
+          });
+          return;
+        }
+
+        // Check if we still have a valid mention pattern
+        if (currentQuery.includes(" ")) {
+          setMentionState({
+            isActive: false,
+            query: "",
+            index: null
+          });
+          return;
+        }
+
+        // Update the query
+        setMentionState(prev => ({
+          ...prev,
+          query: currentQuery
+        }));
+      }
     });
 
     return () => {
@@ -163,6 +234,41 @@ const Editor = ({
     quill?.insertText(quill?.getSelection()?.index || 0, emoji);
   };
 
+  const handleMentionSelect = (username: string) => {
+    if (!quillRef.current || mentionState.index === null) return;
+    
+    // If empty username, just close the popover
+    if (!username) {
+      setMentionState({
+        isActive: false,
+        query: "",
+        index: null
+      });
+      return;
+    }
+
+    const quill = quillRef.current;
+    const currentPosition = quill.getSelection()?.index;
+    if (currentPosition === undefined) return;
+    
+    // Delete the partial @mention
+    const length = currentPosition - mentionState.index;
+    quill.deleteText(mentionState.index, length);
+    
+    // Insert the complete @mention
+    quill.insertText(mentionState.index, `@${username} `);
+    
+    // Reset mention state
+    setMentionState({
+      isActive: false,
+      query: "",
+      index: null
+    });
+    
+    // Move cursor after the inserted mention
+    quill.setSelection(mentionState.index + username.length + 2);
+  };
+
   return (
     <div className="flex flex-col">
       <input
@@ -174,11 +280,17 @@ const Editor = ({
       />
       <div
         className={cn(
-          "flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white",
+          "flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white relative",
           disabled && "opacity-50"
         )}
       >
-        <div ref={containerRef} className="h-full ql-custom"></div>
+        <div ref={containerRef} className="h-full ql-custom relative">
+          <MentionsPopover
+            isOpen={mentionState.isActive}
+            query={mentionState.query}
+            onSelect={handleMentionSelect}
+          />
+        </div>
         {!!image && (
           <div className="p-2">
             <div className="relative size-[62px] flex items-center justify-center group/image">

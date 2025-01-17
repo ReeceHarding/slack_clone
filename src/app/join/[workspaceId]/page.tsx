@@ -3,38 +3,43 @@
 import Image from "next/image";
 import Link from "next/link";
 import VerificationInput from "react-verification-input";
+import { useParams, useRouter } from "next/navigation";
+import { Loader } from "lucide-react";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useWorkspaceId } from "@/hooks/useWorkspaceId";
-import { useGetWorkspaceInfo } from "@/features/workspaces/api/useGetWorkspaceInfo";
-import { Loader } from "lucide-react";
 import { useJoin } from "@/features/workspaces/api/useJoin";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useGetWorkspaceByJoinCode } from "@/features/workspaces/api/useGetWorkspaceByJoinCode";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
 
 const JoinPage = () => {
   const router = useRouter();
-  const workspaceId = useWorkspaceId();
+  const params = useParams();
+  const joinCode = params.workspaceId as string;
 
-  const { isLoading, data: workspaceInfo } = useGetWorkspaceInfo({ id: workspaceId });
+  const { isLoading, data: workspaceInfo } = useGetWorkspaceByJoinCode({ joinCode });
   const join = useJoin();
 
   useEffect(() => {
     if (workspaceInfo?.isMember) {
-      router.push(`/workspace/${workspaceId}`);
+      router.push(`/workspace/${workspaceInfo._id}`);
     }
-  }, [workspaceInfo?.isMember, router, workspaceId]);
+  }, [workspaceInfo?.isMember, router, workspaceInfo?._id]);
 
   const handleComplete = (value: string) => {
+    if (!workspaceInfo?._id) {
+      toast.error("Workspace not found");
+      return;
+    }
+
     join
       .mutateAsync({
         joinCode: value,
-        workspaceId,
+        workspaceId: workspaceInfo._id,
       })
       .then(() => {
-        router.replace(`/workspace/${workspaceId}`);
+        router.replace(`/workspace/${workspaceInfo._id}`);
         toast.success("Workspace joined");
       })
       .catch((error) => {
@@ -51,12 +56,33 @@ const JoinPage = () => {
     );
   }
 
+  if (!workspaceInfo) {
+    return (
+      <div className="h-full flex flex-col gap-y-8 items-center justify-center bg-white p-8 rounded-lg shadow-sm">
+        <Image src="/logo.svg" width={60} height={60} alt="Logo" />
+        <div className="flex flex-col gap-y-4 items-center justify-center max-w-md">
+          <div className="flex flex-col gap-y-2 items-center justify-center">
+            <h1 className="text-2xl font-bold">Workspace not found</h1>
+            <p className="text-md text-muted-foreground">
+              The workspace you are trying to join does not exist
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-x-4">
+          <Button size="lg" variant="outline" asChild>
+            <Link href="/">Home</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col gap-y-8 items-center justify-center bg-white p-8 rounded-lg shadow-sm">
       <Image src="/logo.svg" width={60} height={60} alt="Logo" />
       <div className="flex flex-col gap-y-4 items-center justify-center max-w-md">
         <div className="flex flex-col gap-y-2 items-center justify-center">
-          <h1 className="text-2xl font-bold">Join {workspaceInfo?.name}</h1>
+          <h1 className="text-2xl font-bold">Join {workspaceInfo.name}</h1>
           <p className="text-md text-muted-foreground">
             Enter the workspace code to join
           </p>

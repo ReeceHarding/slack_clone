@@ -301,3 +301,38 @@ export const join = mutation({
     return workspace._id;
   },
 });
+
+export const getByJoinCode = query({
+  args: {
+    joinCode: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      return null;
+    }
+
+    const workspace = await ctx.db
+      .query("workspaces")
+      .filter((q) => q.eq(q.field("joinCode"), args.joinCode.toLowerCase()))
+      .unique();
+
+    if (!workspace) {
+      return null;
+    }
+
+    const member = await ctx.db
+      .query("members")
+      .withIndex("by_workspace_id_user_id", (q) =>
+        q.eq("workspaceId", workspace._id).eq("userId", userId)
+      )
+      .unique();
+
+    return {
+      _id: workspace._id,
+      name: workspace.name,
+      isMember: !!member,
+    };
+  },
+});

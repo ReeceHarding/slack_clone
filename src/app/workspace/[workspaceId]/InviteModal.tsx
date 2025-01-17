@@ -36,7 +36,7 @@ export const InviteModal = ({
   const { mutateAsync, isPending } = useNewJoinCode();
 
   const handleCopy = () => {
-    const inviteLink = `${window.location.origin}/join/${workspaceId}`;
+    const inviteLink = `${window.location.origin}/join/${workspace.joinCode}`;
 
     navigator.clipboard
       .writeText(inviteLink)
@@ -65,29 +65,42 @@ export const InviteModal = ({
           <DialogHeader>
             <DialogTitle>Invite people to {name}</DialogTitle>
             <DialogDescription>
-              use the code below to invite people to your workspace
+              Share either the code or the invite link with people you want to invite
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-y-4 items-center justify-center py-10">
-            <p className="text-4xl font-bold tracking-widest uppercase">
-              {joinCode}
-            </p>
-            <Button variant="ghost" size="sm" onClick={handleCopy}>
-              Copy link
-              <CopyIcon className="size-4 ml-2" />
-            </Button>
+          <div className="flex flex-col gap-y-6 items-center justify-center py-6">
+            <div className="flex flex-col items-center gap-y-2 w-full">
+              <p className="text-sm font-medium text-muted-foreground">Join Code</p>
+              <div className="bg-muted w-full p-4 rounded-lg flex items-center justify-center">
+                <p className="text-3xl font-mono tracking-[0.5em] font-bold uppercase">
+                  {joinCode}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-y-2 w-full">
+              <p className="text-sm font-medium text-muted-foreground">Invite Link</p>
+              <div className="bg-muted w-full p-3 rounded-lg flex items-center justify-between gap-x-2">
+                <code className="text-sm text-muted-foreground truncate">
+                  {`${window.location.origin}/join/${workspaceId}`}
+                </code>
+                <Button variant="ghost" size="sm" onClick={handleCopy} className="shrink-0">
+                  <CopyIcon className="size-4" />
+                </Button>
+              </div>
+            </div>
           </div>
           <div className="flex items-center justify-between w-full">
             <Button
               onClick={handleNewCode}
               variant="outline"
               disabled={isPending}
+              className="gap-x-2"
             >
-              New code
-              <RefreshCcw className="size-4 ml-2" />
+              Generate New Code
+              <RefreshCcw className="size-4" />
             </Button>
             <DialogClose asChild>
-              <Button>Close</Button>
+              <Button>Done</Button>
             </DialogClose>
           </div>
         </DialogContent>

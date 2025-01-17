@@ -22,14 +22,7 @@ export const ChatWidget = () => {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    // Only auto-scroll if we're near the bottom already or if it's a new message
-    const container = messagesEndRef.current?.parentElement;
-    if (container) {
-      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-      if (isNearBottom || messages.length <= 1) {
-        scrollToBottom();
-      }
-    }
+    scrollToBottom();
   }, [messages]);
 
   // Handle escape key to close chat

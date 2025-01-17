@@ -100,6 +100,7 @@ body {
 .ql-toolbar {
   border: none !important;
   background-color: #f8f8f8 !important;
+  z-index: 10 !important;
 }
 
 .ql-toolbar .ql-formats:not(:last-child) {
@@ -111,6 +112,7 @@ body {
   font-family: "Lato", sans-serif !important;
   border: none !important;
   height: unset !important;
+  position: relative !important;
 }
 
 .ql-editor {
