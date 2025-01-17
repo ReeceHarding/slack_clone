@@ -77,9 +77,19 @@ export const insertMessageToPinecone = action({
 
         const embedding = embeddingResponse.data[0].embedding;
 
+        // Parse the rich text JSON to extract plain text
+        let plainText = args.messageBody;
+        try {
+          const richText = JSON.parse(args.messageBody);
+          plainText = richText.ops?.map((op: any) => op.insert).join('') || args.messageBody;
+        } catch (e) {
+          // If parsing fails, use the original text
+          console.log("Failed to parse rich text, using original:", e);
+        }
+
         // Convert IDs to strings for Pinecone metadata
         const metadata = {
-          text: args.messageBody,
+          text: plainText,
           channelId: args.channelId?.toString() || "",
           conversationId: args.conversationId?.toString() || "",
           workspaceId: args.workspaceId.toString(),
