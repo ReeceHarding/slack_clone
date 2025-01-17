@@ -360,6 +360,10 @@ export const create = mutation({
       conversationId: _conversationId,
     });
 
+    // Get the user info
+    const user = await ctx.db.get(member.userId);
+    const username = user?.name || "Unknown User";
+
     // Trigger embedding creation
     await ctx.scheduler.runAfter(0, api.embeddings.insertMessageToPinecone, {
       messageId,
@@ -367,6 +371,9 @@ export const create = mutation({
       channelId: args.channelId,
       conversationId: _conversationId,
       workspaceId: args.workspaceId,
+      memberId: member._id,
+      username: username,
+      creationTime: Date.now(),
     });
 
     return messageId;
