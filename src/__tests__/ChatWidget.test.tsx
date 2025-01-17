@@ -10,7 +10,15 @@ jest.mock("sonner", () => ({
   },
 }));
 
+// Mock fetch
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
+
 describe("ChatWidget", () => {
+  beforeEach(() => {
+    mockFetch.mockClear();
+  });
+
   it("renders the chat bubble", () => {
     render(<ChatWidget />);
     const bubble = screen.getByTestId("chat-widget");
@@ -31,7 +39,15 @@ describe("ChatWidget", () => {
     expect(screen.getByTestId("chat-window")).toBeInTheDocument();
   });
 
-  it("allows typing and sending messages", async () => {
+  it("allows typing and sending messages, and displays the conversation", async () => {
+    // Mock successful API response
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ answer: "I'm doing well, thank you!" }),
+      })
+    );
+
     render(<ChatWidget />);
     
     // Open chat window
@@ -40,9 +56,10 @@ describe("ChatWidget", () => {
     // Type a message
     const input = screen.getByTestId("chat-input") as HTMLInputElement;
     const sendButton = screen.getByTestId("send-button");
+    const messageText = "Hello, how are you?";
     
-    fireEvent.change(input, { target: { value: "Hello, world!" } });
-    expect(input).toHaveValue("Hello, world!");
+    fireEvent.change(input, { target: { value: messageText } });
+    expect(input).toHaveValue(messageText);
     
     // Send message
     fireEvent.click(sendButton);
@@ -59,6 +76,44 @@ describe("ChatWidget", () => {
     
     // Input should be cleared after sending
     expect(input).toHaveValue("");
+
+    // Check if messages are displayed
+    const messages = screen.getByTestId("chat-messages");
+    expect(messages).toHaveTextContent(messageText);
+    expect(messages).toHaveTextContent("I'm doing well, thank you!");
+
+    // Verify API call
+    expect(mockFetch).toHaveBeenCalledWith('/api/chatbot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userMessage: messageText }),
+    });
+  });
+
+  it("handles API errors gracefully", async () => {
+    // Mock failed API response
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+      })
+    );
+
+    render(<ChatWidget />);
+    fireEvent.click(screen.getByTestId("chat-widget"));
+    
+    const input = screen.getByTestId("chat-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Hello" } });
+    fireEvent.click(screen.getByTestId("send-button"));
+
+    // Wait for error handling to complete
+    await waitFor(() => {
+      expect(input).not.toBeDisabled();
+    });
+
+    // User message should still be displayed
+    const messages = screen.getByTestId("chat-messages");
+    expect(messages).toHaveTextContent("Hello");
   });
 
   it("prevents sending empty messages", async () => {
@@ -76,5 +131,9 @@ describe("ChatWidget", () => {
     // Input and button should not be disabled
     expect(input).not.toBeDisabled();
     expect(sendButton).not.toBeDisabled();
+
+    // No messages should be displayed
+    const messages = screen.getByTestId("chat-messages");
+    expect(messages).toBeEmptyDOMElement();
   });
 }); 
