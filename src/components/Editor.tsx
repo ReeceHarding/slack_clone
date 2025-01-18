@@ -105,7 +105,7 @@ const Editor = ({
         const node = super.create();
         node.setAttribute('class', 'ql-mention');
         node.setAttribute('data-mention', data);
-        node.textContent = '@' + data;
+        node.textContent = data;
         return node;
       }
       
@@ -292,14 +292,15 @@ const Editor = ({
     // Delete the typed @ and query
     quill.deleteText(mentionState.index, currentPosition - mentionState.index);
     
-    // Insert the mention as a format
-    quill.insertText(mentionState.index, username, { mention: username });
+    // Insert the mention with @ symbol included
+    const mentionText = '@' + username;
+    quill.insertText(mentionState.index, mentionText, { mention: username });
     
     // Add a space after the mention
-    quill.insertText(mentionState.index + username.length, ' ');
+    quill.insertText(mentionState.index + mentionText.length, ' ');
     
     // Move cursor after the mention and space
-    quill.setSelection(mentionState.index + username.length + 1, 0);
+    quill.setSelection(mentionState.index + mentionText.length + 1, 0);
 
     // Reset mention state
     setMentionState({

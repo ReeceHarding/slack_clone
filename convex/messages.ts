@@ -534,6 +534,19 @@ export const create = mutation({
     // Debug logging
     console.log("Created message with ID:", messageId);
 
+    // Send message to Pinecone for vector search
+    await ctx.scheduler.runAfter(0, api.embeddings.insertMessageToPinecone, {
+      messageId,
+      messageBody: args.body,
+      channelId: args.channelId,
+      conversationId: args.conversationId,
+      workspaceId: args.workspaceId,
+      memberId: member._id,
+      username: (await ctx.db.get(userId))?.name || "Unknown User",
+      creationTime: Date.now(),
+      formattedCreationTime: new Date().toISOString(),
+    });
+
     return messageId;
   }
 });
