@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "convex deploy && next build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "framework": "nextjs",
