@@ -13,7 +13,6 @@ Only modify the files and lines necessary to implement the current feature or fi
 Do not add or remove unrelated code.
 Provide Code in Small Batches
 Give only the code snippet(s) for the current task.
-Use triple backticks (```) to format the code.
 Confirm No Breakage
 Ensure existing features remain functional.
 For each code snippet, explain how it should be tested or how we should test that it doesn’t break other parts of the system.

@@ -1,6 +1,9 @@
 import dayjs, { Dayjs } from "dayjs";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
+import { useOptimizedMessages } from "@/features/messages/hooks/useOptimizedMessages";
+import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
 
 import { useRemoveMessage } from "@/features/messages/api/useRemoveMessage";
 import { useUpdateMessage } from "@/features/messages/api/useUpdateMessage";
@@ -15,6 +18,7 @@ import { ThreadBar } from "./ThreadBar";
 import { Thumbnail } from "./Thumbnail";
 import { Toolbar } from "./Toolbar";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 const Renderer = dynamic(() => import("@/components/Renderer"), { ssr: false });
 const Editor = dynamic(() => import("@/components/Editor"), { ssr: false });
@@ -43,6 +47,9 @@ interface MessageProps {
   threadTimestamp?: number;
   threadName?: string;
   setEditingId: (id: Id<"messages"> | null) => void;
+  channelId?: Id<"channels">;
+  conversationId?: Id<"conversations">;
+  parentMessageId?: Id<"messages">;
 }
 
 const formatFullTime = (date: Dayjs) => {
@@ -52,6 +59,9 @@ const formatFullTime = (date: Dayjs) => {
 };
 
 export const Message = ({
+  channelId,
+  conversationId,
+  parentMessageId,
   body,
   createdAt,
   id,
@@ -71,8 +81,14 @@ export const Message = ({
   isAuthor,
   setEditingId,
 }: MessageProps) => {
-  const {
+  console.log("[Message] Component rendering with:", {
+    channelId,
+    conversationId,
     parentMessageId,
+  });
+
+  const {
+    parentMessageId: panelParentMessageId,
     openMessage,
     openProfile,
     close: closeMessage,
@@ -84,6 +100,30 @@ export const Message = ({
   const updateMessage = useUpdateMessage();
   const removeMessage = useRemoveMessage();
   const toggleReaction = useToggleReaction();
+
+  const { messages, hasMore, isLoadingMore, loadMore } = useOptimizedMessages({
+    channelId,
+    conversationId,
+    parentMessageId,
+  });
+
+  const { ref, inView } = useInView({
+    threshold: 0,
+  });
+
+  useEffect(() => {
+    console.log("[Message] Scroll visibility changed:", {
+      inView,
+      hasMore,
+      isLoadingMore,
+      messageCount: messages.length
+    });
+
+    if (inView && hasMore && !isLoadingMore) {
+      console.log("[Message] Loading more messages");
+      loadMore();
+    }
+  }, [inView, hasMore, isLoadingMore, loadMore, messages.length]);
 
   const isPending =
     updateMessage.isPending ||
@@ -118,7 +158,7 @@ export const Message = ({
         toast.success("Message deleted");
         setEditingId(null);
 
-        if (id === parentMessageId) {
+        if (id === panelParentMessageId) {
           closeMessage();
         }
       })

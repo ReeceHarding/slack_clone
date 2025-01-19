@@ -1,9 +1,6 @@
-import { ConvexHttpApi } from "@convex-dev/auth/next";
-import { httpRouter } from "convex/server";
+import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
 
-const http = httpRouter();
+const handler = convexAuthNextjsMiddleware();
 
-export const { GET, POST, HEAD } = ConvexHttpApi({
-  router: http,
-  path: "/api/auth",
-}); 
+export const GET = handler;
+export const POST = handler; 

@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useWorkspaceId } from "@/hooks/useWorkspaceId";
 import { useCurrentMember } from "@/features/members/api/useCurrentMember";
 import { usePanel } from "@/hooks/usePanel";
+import { toast } from "sonner";
 
 export const UserButton = () => {
   const router = useRouter();
@@ -24,6 +25,17 @@ export const UserButton = () => {
   const workspaceId = useWorkspaceId();
   const currentMember = useCurrentMember({ workspaceId });
   const { openProfile } = usePanel();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      // Force redirect to auth page
+      router.push("/auth");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Failed to log out");
+    }
+  };
 
   if (isLoading || currentMember.isLoading) {
     return <Loader className="size-4 animate-spin text-white" />;
@@ -70,7 +82,7 @@ export const UserButton = () => {
           Profile
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut()} className="h-10 cursor-pointer">
+        <DropdownMenuItem onClick={handleLogout} className="h-10 cursor-pointer">
           <LogOutIcon className="size-4 mr-2" />
           Log out
         </DropdownMenuItem>

@@ -1,48 +1,41 @@
-import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
 
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { Modals } from "@/components/Modals";
-import ReactQueryProvider from "@/components/react-query-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "../components/theme-provider";
+
 import "./globals.css";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Slack Clone",
+  description: "A modern Slack clone built with Next.js and Convex",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <ConvexAuthNextjsServerProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <ConvexClientProvider>
-            <ReactQueryProvider>
-              <Toaster />
-              <Modals />
-              {children}
-            </ReactQueryProvider>
-          </ConvexClientProvider>
-        </body>
-      </html>
-    </ConvexAuthNextjsServerProvider>
+    <html lang="en">
+      <body className={inter.className}>
+        <ConvexClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            storageKey="slack-clone-theme"
+          >
+            <Toaster position="bottom-center" />
+            <Modals />
+            {children}
+          </ThemeProvider>
+        </ConvexClientProvider>
+      </body>
+    </html>
   );
 }
