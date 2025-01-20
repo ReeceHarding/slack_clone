@@ -14,8 +14,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "convex": "convex",
-    "convex:dev": "convex dev",
-    "postinstall": "convex deploy"
+    "convex:dev": "convex dev"
   },
   "dependencies": {
     "@auth/core": "^0.37.0",
