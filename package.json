@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "convex deploy && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
@@ -20,7 +20,7 @@
   "dependencies": {
     "@auth/core": "^0.37.0",
     "@clerk/nextjs": "^6.9.14",
-    "@convex-dev/auth": "^0.0.80",
+    "@convex/auth": "^1.18.2",
     "@pinecone-database/pinecone": "^4.1.0",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.1",
