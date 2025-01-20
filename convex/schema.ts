@@ -1,11 +1,15 @@
 import { defineSchema, defineTable } from "convex/server";
-import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
-const schema = defineSchema({
-  // We spread all authentication tables in so the 'users' table is automatically created
-  // That table can contain 'name', 'email', and more once we define them in createUser in auth.ts
-  ...authTables,
+export default defineSchema({
+  users: defineTable({
+    tokenIdentifier: v.string(),
+    email: v.string(),
+    name: v.string(),
+    image: v.optional(v.string()),
+    orgIds: v.array(v.string()),
+    aiEnabled: v.boolean(),
+  }).index("by_token", ["tokenIdentifier"]),
 
   workspaces: defineTable({
     name: v.string(),
@@ -59,14 +63,6 @@ const schema = defineSchema({
     .index("by_workspace_id", ["workspaceId"])
     .index("by_message_id", ["messageId"])
     .index("by_member_id", ["memberId"]),
-  users: defineTable({
-    name: v.string(),
-    email: v.string(),
-    image: v.string(),
-    tokenIdentifier: v.string(),
-    orgIds: v.array(v.string()),
-    aiEnabled: v.optional(v.boolean()),
-  }).index("by_token", ["tokenIdentifier"]),
   notifications: defineTable({
     userId: v.id("users"),
     messageId: v.id("messages"),
@@ -81,5 +77,3 @@ const schema = defineSchema({
     .index("by_message_id", ["messageId"])
     .index("by_user_id_created_at", ["userId", "createdAt"]),
 });
-
-export default schema;

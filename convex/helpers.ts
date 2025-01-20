@@ -107,4 +107,24 @@ export function getPaginationParams(cursor?: string, limit: number = 50) {
     limit,
     numItems: limit
   };
-} 
+}
+
+export const getAuthenticatedUser = async (ctx: QueryCtx): Promise<Id<"users">> => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error("Unauthorized");
+  }
+
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_token", (q) =>
+      q.eq("tokenIdentifier", identity.tokenIdentifier)
+    )
+    .unique();
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user._id;
+}; 

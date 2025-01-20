@@ -1,11 +1,17 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 
 import { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { api } from "./_generated/api";
-import { batchLoadMembers, batchLoadReactions, batchLoadUsers, getPaginationParams, processReactions } from "./helpers";
+import { 
+  batchLoadMembers, 
+  batchLoadReactions, 
+  batchLoadUsers, 
+  getPaginationParams, 
+  processReactions,
+  getAuthenticatedUser 
+} from "./helpers";
 
 const populateThread = async (ctx: QueryCtx, messageId: Id<"messages">) => {
   const messages = await ctx.db
@@ -148,7 +154,7 @@ export const update = mutation({
     body: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getAuthenticatedUser(ctx);
 
     if (!userId) {
       throw new Error("Unauthorized");
@@ -180,7 +186,7 @@ export const remove = mutation({
     id: v.id("messages"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getAuthenticatedUser(ctx);
 
     if (!userId) {
       throw new Error("Unauthorized");
@@ -215,7 +221,7 @@ export const get = query({
   handler: async (ctx, args) => {
     console.log("[messages.get] Query started with args:", args);
     
-    const userId = await getAuthUserId(ctx);
+    const userId = await getAuthenticatedUser(ctx);
 
     if (!userId) {
       throw new Error("Unauthorized");
@@ -356,7 +362,7 @@ export const getById = query({
     id: v.id("messages"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await getAuthenticatedUser(ctx);
 
     if (!userId) {
       return null;
@@ -478,7 +484,7 @@ export const create = mutation({
     }
 
     // Regular user message flow
-    const userId = await getAuthUserId(ctx);
+    const userId = await getAuthenticatedUser(ctx);
 
     if (!userId) {
       throw new Error("Unauthorized");
