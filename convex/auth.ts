@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { ConvexError, mutation, query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const getUser = query({
   args: {},
@@ -17,7 +17,7 @@ export const createUser = mutation({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new ConvexError("Called createUser without authentication present");
+      throw new Error("Called createUser without authentication present");
     }
 
     // Check if user already exists
@@ -37,7 +37,7 @@ export const createUser = mutation({
       tokenIdentifier: identity.tokenIdentifier,
       email: identity.email ?? "",
       name: identity.name ?? "",
-      image: identity.imageUrl ?? "",
+      image: identity.imageUrl ? String(identity.imageUrl) : undefined,
       orgIds: [],
       aiEnabled: false,
     });
